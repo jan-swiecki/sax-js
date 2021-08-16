@@ -23,7 +23,7 @@
     "@types/node": "^16.6.1",
     "@types/tap": "^15.0.5",
     "standard": "^8.6.0",
-    "tap": "^10.5.1"
+    "tap": "^15.0.9"
   },
   "dependencies": {
     "lodash": "^3.10.1"

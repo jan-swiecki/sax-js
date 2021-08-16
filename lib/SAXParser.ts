@@ -303,6 +303,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
     super()
     this.strict = strict
     this.opt = opt
+    this.reset()
   }
 
   private clearBuffers () {
@@ -978,7 +979,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
 
       var parent = this.tags[this.tags.length - 1] || this
       if (tag.ns && parent.ns !== tag.ns) {
-        Object.keys(tag.ns).forEach(function (p) {
+        Object.keys(tag.ns).forEach(p => {
           this.emitNode('onopennamespace', {
             prefix: p,
             uri: tag.ns[p]
@@ -1108,7 +1109,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
       var parent = this.tags[this.tags.length - 1] || this
       if (this.opt.xmlns && tag.ns !== parent.ns) {
         // remove namespace bindings introduced by tag
-        Object.keys(tag.ns).forEach(function (p) {
+        Object.keys(tag.ns).forEach(p => {
           var n = tag.ns[p]
           this.emitNode('onclosenamespace', { prefix: p, uri: n })
         })

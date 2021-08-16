@@ -6,20 +6,11 @@ rm -rf dist
 
 esbuild \
   --log-level=warning \
-  --external:sqlite3 \
-  --external:yargs \
-  --external:node:stream \
-  --external:express \
-  --external:typescript \
-  --external:blessed \
-  --external:event-stream \
-  --external:got \
-  --external:keyv \
-  --external:winston \
+  --external:tap \
   --sourcemap \
   --keep-names \
   --platform=node --target=node16 --bundle --outdir=dist \
-  **/*.ts *.ts
+  **/*.ts
 
 for x in lib bin test; do
   if [ -d "$x" ]; then

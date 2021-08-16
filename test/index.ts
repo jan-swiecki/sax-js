@@ -5,13 +5,13 @@ import t from 'tap'
 // handy way to do simple unit tests
 // if the options contains an xml string, it'll be written and the parser closed.
 // otherwise, it's assumed that the test will write and close.
-export default function test (options) {
+export function test (options) {
   var xml = options.xml
   var parser = new SAXParser(options.strict, options.opt)
   var expect = options.expect
   var e = 0
   EventTypes.forEach(function (ev) {
-    parser[ev] = function (n) {
+    parser.on(ev, function (n) {
       if (process.env.DEBUG) {
         console.error({
           expect: expect[e],
@@ -32,7 +32,7 @@ export default function test (options) {
         return
       }
 
-      t.equal(ev, expect[e][0])
+      t.equal(ev.replace(/^on/, ''), expect[e][0])
       if (ev === 'onerror') {
         t.equal(n.message, expect[e][1])
       } else {
@@ -42,7 +42,7 @@ export default function test (options) {
       if (ev === 'onerror') {
         parser.resume()
       }
-    }
+    })
   })
   if (xml) {
     parser.write(xml).close()
