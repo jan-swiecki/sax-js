@@ -1,0 +1,15 @@
+#!/bin/bash
+set -eo pipefail
+
+cd dist
+
+node="node --enable-source-maps --trace-warnings"
+if [ ! -z "$NDB" ]; then
+  node="ndb $node"
+elif [ ! -z "$NDB_PROF" ]; then
+  node="ndb --prof $node"
+elif [ ! -z "$PROFILE" ]; then
+  node="0x -- $node"
+fi
+
+$node "$@"

@@ -1,0 +1,33 @@
+#!/bin/bash
+set -eo pipefail
+safe-rm -rf dist
+
+rm -rf dist
+
+esbuild \
+  --log-level=warning \
+  --external:sqlite3 \
+  --external:yargs \
+  --external:node:stream \
+  --external:express \
+  --external:typescript \
+  --external:blessed \
+  --external:event-stream \
+  --external:got \
+  --external:keyv \
+  --external:winston \
+  --sourcemap \
+  --keep-names \
+  --platform=node --target=node16 --bundle --outdir=dist \
+  **/*.ts *.ts
+
+for x in lib bin test; do
+  if [ -d "$x" ]; then
+    mkdir -p dist/$x
+    rsync -aur --exclude="*.ts" ./$x/ dist/$x
+  elif [[ -f "$x" && ! "$x" =~ \.ts$ ]]; then
+    cp "$x" dist/$x
+  fi
+done
+
+cp package.json dist
