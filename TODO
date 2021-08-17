@@ -2,3 +2,4 @@
 * Add ts-standard
 * Build browser version
 * Run tests for multiple browser/node environments
+* Distribution package should be bundled
