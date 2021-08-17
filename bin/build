@@ -3,20 +3,20 @@ set -eo pipefail
 
 rm -rf dist
 
-# --external:tap \
-# --external:lodash \
-# --bundle \
-
 esbuild="esbuild \
   --log-level=warning \
   --keep-names \
-  --target=node10 \
+  --target=node16 \
   --platform=node \
   --outdir=dist"
 
-# $esbuild --format=cjs --bundle lib/sax.ts
-$esbuild --format=cjs --outdir=dist lib/*.ts test/*
-
-cp package.json dist
-
-# tsc --esModuleInterop --lib es2020 --declaration --emitDeclarationOnly --outDir dist/lib lib/sax.ts
+if [ "$1" == "--for-testing" ]; then
+  $esbuild --format=cjs --outdir=dist lib/*.ts test/*
+else
+  $esbuild --format=cjs --bundle lib/sax.ts
+  # cp package.json dist
+  # tsc -m commonjs --esModuleInterop --lib es2017 --declaration --emitDeclarationOnly --outFile dist/sax.d.ts lib/*.ts
+  tsc -m commonjs --esModuleInterop --lib es2017 \
+    --declaration --declarationMap --sourceMap \
+    --emitDeclarationOnly --outDir dist lib/sax.ts
+fi
