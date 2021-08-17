@@ -5,6 +5,7 @@
   "version": "1.2.4",
   "main": "lib/sax.js",
   "license": "ISC",
+  "type": "module",
   "scripts": {
     "test": "tap test/*.js --cov -j4",
     "posttest": "standard -F test/*.js lib/*.js",

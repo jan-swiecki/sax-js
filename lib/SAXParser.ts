@@ -142,7 +142,7 @@ const sax: {
   // STATE?: {[key: StateName]: string|number},
   STATE?: Record<StateName, number>,
   XML_ENTITIES?: {[key: string]: string},
-  ENTITIES?: {[key: string|number]: string|number},
+  ENTITIES?: {[key: string]: string|number},
 } = {};
 
 sax.STATE = {

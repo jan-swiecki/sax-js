@@ -1,18 +1,20 @@
 #!/bin/bash
 set -eo pipefail
-safe-rm -rf dist
 
 rm -rf dist
 
+# --external:tap \
+# --external:lodash \
+# --bundle \
 esbuild \
   --log-level=warning \
-  --external:tap \
-  --sourcemap \
   --keep-names \
-  --platform=node --target=node16 --bundle --outdir=dist \
-  **/*.ts
+  --tsconfig=tsconfig.json \
+  --platform=node \
+  --outdir=dist \
+  lib/sax.ts test/*.ts
 
-for x in lib bin test; do
+for x in lib test; do
   if [ -d "$x" ]; then
     mkdir -p dist/$x
     rsync -aur --exclude="*.ts" ./$x/ dist/$x
@@ -22,3 +24,5 @@ for x in lib bin test; do
 done
 
 cp package.json dist
+
+tsc --esModuleInterop --lib es2020 --declaration --emitDeclarationOnly --outDir dist/lib lib/sax.ts
