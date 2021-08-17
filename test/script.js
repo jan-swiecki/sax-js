@@ -1,6 +1,6 @@
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: "<html><head><script>if (1 < 0) { console.log('elo there'); }</script></head></html>",
   expect: [
     [

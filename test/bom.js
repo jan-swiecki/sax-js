@@ -1,7 +1,7 @@
 // BOM at the very begining of the stream should be ignored
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: '\uFEFF<P></P>',
   expect: [
     ['opentagstart', {'name': 'P', attributes: {}}],
@@ -11,9 +11,9 @@ index.test({
 })
 
 // In all other places it should be consumed
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: '\uFEFF<P BOM="\uFEFF">\uFEFFStarts and ends with BOM\uFEFF</P>',
   expect: [
     ['opentagstart', {'name': 'P', attributes: {}}],
@@ -25,9 +25,9 @@ index.test({
 })
 
 // BOM after a whitespace is an error
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: ' \uFEFF<P></P>',
   expect: [
     ['error', 'Non-whitespace before first tag.\nLine: 0\nColumn: 2\nChar: \uFEFF'],
@@ -40,9 +40,9 @@ index.test({
 })
 
 // There is only one BOM allowed at the start
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: '\uFEFF\uFEFF<P></P>',
   expect: [
     ['error', 'Non-whitespace before first tag.\nLine: 0\nColumn: 2\nChar: \uFEFF'],

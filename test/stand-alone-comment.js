@@ -1,7 +1,7 @@
 // https://github.com/isaacs/sax-js/issues/124
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: '<!-- stand alone comment -->',
   expect: [
     [

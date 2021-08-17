@@ -1,14 +1,15 @@
-var sax = require('../')
+var { ENTITIES } = require('../lib/SAXParser')
+
 var xml = '<r>'
 var text = ''
-for (var i in sax.ENTITIES) {
+for (var i in ENTITIES) {
   xml += '&' + i + ';'
-  text += sax.ENTITIES[i]
+  text += ENTITIES[i]
 }
 xml += '</r>'
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: xml,
   expect: [
     ['opentagstart', {'name': 'R', attributes: {}}],

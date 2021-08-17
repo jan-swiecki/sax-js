@@ -1,6 +1,6 @@
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   opt: { strictEntities: true },
   xml: '<r>&rfloor; ' +
     '&spades; &copy; &rarr; &amp; ' +

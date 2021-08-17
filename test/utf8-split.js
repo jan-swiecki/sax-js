@@ -1,9 +1,13 @@
-var tap = require('tap')
-var saxStream = require('../lib/sax').createStream()
+const tap = require('tap')
+const { SAXStream } = require('../lib/SAXStream')
+var saxStream = new SAXStream()
+saxStream.emitAllNodeTypes()
 
 var b = new Buffer('误')
 
-saxStream.on('text', function (text) {
+tap.plan(2)
+
+saxStream.on('ontext', function (text) {
   tap.equal(text, b.toString())
 })
 
@@ -19,9 +23,9 @@ saxStream.write(new Buffer('</c>'))
 saxStream.write(Buffer.concat([new Buffer('<d>'), b.slice(0, 1)]))
 saxStream.end(Buffer.concat([b.slice(1), new Buffer('</d></test>')]))
 
-var saxStream2 = require('../lib/sax').createStream()
+var saxStream2 = new SAXStream()
 
-saxStream2.on('text', function (text) {
+saxStream2.on('ontext', function (text) {
   tap.equal(text, '�')
 })
 

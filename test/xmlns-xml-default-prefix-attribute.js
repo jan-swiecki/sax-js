@@ -1,6 +1,6 @@
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: "<root xml:lang='en'/>",
   expect: [
     [

@@ -1,4 +1,4 @@
-import { EventTypes, SAXParser } from "./SAXParser.js";
+import { EventTypes, SAXParser, ENTITIES } from "./SAXParser.js";
 import { SAXStream } from './SAXStream.js';
 
-export { SAXParser, SAXStream, EventTypes };
+export { SAXParser, SAXStream, EventTypes, ENTITIES };

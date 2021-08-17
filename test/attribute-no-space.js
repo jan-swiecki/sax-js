@@ -1,7 +1,7 @@
 // non-strict: no error
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: '<root attr1="first"attr2="second"/>',
   expect: [
     [ 'opentagstart', { name: 'root', attributes: {} } ],
@@ -15,9 +15,9 @@ index.test({
 })
 
 // strict: should give an error, but still parse
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: '<root attr1="first"attr2="second"/>',
   expect: [
     [ 'opentagstart', { name: 'root', attributes: {} } ],
@@ -33,9 +33,9 @@ index.test({
 )
 
 // strict: other cases should still pass
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: '<root attr1="first" attr2="second"/>',
   expect: [
     [ 'opentagstart', { name: 'root', attributes: {} } ],
@@ -49,9 +49,9 @@ index.test({
 })
 
 // strict: other cases should still pass
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: '<root attr1="first"\nattr2="second"/>',
   expect: [
     [ 'opentagstart', { name: 'root', attributes: {} } ],
@@ -65,9 +65,9 @@ index.test({
 })
 
 // strict: other cases should still pass
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: '<root attr1="first"  attr2="second"/>',
   expect: [
     [ 'opentagstart', { name: 'root', attributes: {} } ],

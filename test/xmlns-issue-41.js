@@ -1,7 +1,3 @@
-var t = import index from "./index.js";
-
-index
-
 // should be the same both ways.
 var xmls = [
   '<parent xmlns:a="http://ATTRIBUTE" a:attr="value" />',
@@ -84,7 +80,7 @@ var ex2 = [ex1[0], ex1[1], ex1[3], ex1[2]].concat(ex1.slice(4))
 var expected = [ex1, ex2]
 
 xmls.forEach(function (x, i) {
-  t.test({
+  require(__dirname).test({
     xml: x,
     expect: expected[i],
     strict: true,

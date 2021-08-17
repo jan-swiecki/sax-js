@@ -1,6 +1,6 @@
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: '<r>&rfloor; ' +
     '&spades; &copy; &rarr; &amp; ' +
     '&lt; < <  <   < &gt; &real; &weierp; &euro;</r>',

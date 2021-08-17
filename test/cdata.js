@@ -1,6 +1,6 @@
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: '<r><![CDATA[ this is character data  ]]></r>',
   expect: [
     ['opentagstart', {'name': 'R', 'attributes': {}}],

@@ -1,12 +1,14 @@
 {
   "compilerOptions": {
-    "module": "ES2020",
-    "target": "es2020",
+    "module": "commonjs",
+    "target": "es2017",
+    "lib": ["es2017"],
     "declaration": true,
     "outDir": "./dist",
     "sourceMap": true,
-    "allowSyntheticDefaultImports": true,
-    "moduleResolution": "Node"
+    // "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    // "esModuleInterop": false,
   },
   "include": [
     "lib/**/*.ts",

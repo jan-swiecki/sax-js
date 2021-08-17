@@ -1,20 +1,23 @@
-import { Duplex } from "stream"
+import { Duplex, Transform } from "stream"
 
 
 import { NodeTypes, SAXParser, NodeType } from './SAXParser.js';
 
 
-export type SAXData = {
+export type SAXDataEvent = {
   nodeType: NodeType,
   data?: any
 }
 
 
-export class SAXStream extends Duplex {
+export class SAXStream extends Transform {
   private _parser: SAXParser
+  private buffer: SAXDataEvent[] = []
 
-  constructor(strict: boolean, opt) {
-    super()
+  constructor(strict: boolean = false, opt = {}) {
+    super({
+      readableObjectMode: true
+    })
     this._parser = new SAXParser(strict, opt)
 
     this._parser.on('onend', () => {
@@ -30,21 +33,53 @@ export class SAXStream extends Duplex {
     })
   }
 
-  on(event: string | symbol | NodeType, listener: (...args: any[]) => void) {
-    if(NodeTypes.includes(event as NodeType)) {
-      this._parser.on(event, (data) => {
-        this.emit('data', {
-          nodeType: event,
-          data: data
+  emitNodeTypes(...nodeTypes: NodeType[]) {
+    for(const nodeType of nodeTypes) {
+      if(this._parser.listenerCount(nodeType) === 0) {
+        this._parser.on(nodeType, (data) => {
+          // console.log(data)
+          // this.push(this.buffer.length > 0 ? this.alsoEmit(this.buffer.shift()) : null)
+          this.push(this.alsoEmit({
+            nodeType: nodeType,
+            data: data
+          }))
         })
-      })
-    } else {
-      super.on(event, listener)
+      }
     }
-
-    return this;
   }
 
+  emitAllNodeTypes() {
+    this.emitNodeTypes(...NodeTypes)
+  }
+
+  // on(event: string | symbol | NodeType, listener: (...args: any[]) => void) {
+  //   if(NodeTypes.includes(event as NodeType)) {
+  //     const nodeType = event as NodeType
+  //     this.emitNodeTypes(nodeType)
+  //     this.on('data', (data) => {
+  //       this.buffer.push({
+  //         nodeType: event,
+  //         data: data
+  //       })
+  //     })
+  //   } else {
+  //     super.on(event, listener)
+  //   }
+
+  //   return this;
+  // }
+
+  private alsoEmit(event: SAXDataEvent): SAXDataEvent {
+    this.emit(event.nodeType, event.data)
+    return event;
+  }
+
+  _destroy(err, callback) {
+    this.buffer = []
+    callback(err);
+  }
+
+  // Writable methods
   _write(chunk, encoding, callback) {
     // The underlying source only deals with strings.
     if (Buffer.isBuffer(chunk)) {

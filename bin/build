@@ -3,27 +3,21 @@ set -eo pipefail
 
 rm -rf dist
 
-# --external:tap \
-# --external:lodash \
-# --bundle \
-esbuild \
+  # --external:tap \
+  # --external:lodash \
+  # --bundle \
+
+esbuild="esbuild \
   --log-level=warning \
   --keep-names \
-  --tsconfig=tsconfig.json \
+  --target=node10 \
   --platform=node \
-  --outdir=dist \
-  lib/sax.ts test/*.ts
-  # --out-extension:.js=.mjs \
+  --outdir=dist"
 
-for x in lib test; do
-  if [ -d "$x" ]; then
-    mkdir -p dist/$x
-    rsync -aur --exclude="*.ts" ./$x/ dist/$x
-  elif [[ -f "$x" && ! "$x" =~ \.ts$ ]]; then
-    cp "$x" dist/$x
-  fi
-done
+
+# $esbuild --format=cjs --bundle lib/sax.ts
+$esbuild --format=cjs --outdir=dist lib/*.ts test/*
 
 cp package.json dist
 
-tsc --esModuleInterop --lib es2020 --declaration --emitDeclarationOnly --outDir dist/lib lib/sax.ts
+# tsc --esModuleInterop --lib es2020 --declaration --emitDeclarationOnly --outDir dist/lib lib/sax.ts

@@ -1,7 +1,7 @@
 // https://github.com/isaacs/sax-js/issues/47
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: '<a href="query.svc?x=1&y=2&z=3"/>',
   expect: [
     [ 'opentagstart', { name: 'A', attributes: {} } ],

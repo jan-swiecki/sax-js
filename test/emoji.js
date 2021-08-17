@@ -1,7 +1,7 @@
 // split high-order numeric attributes into surrogate pairs
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: '<a>&#x1f525;</a>',
   expect: [
     [ 'opentagstart', { name: 'A', attributes: {} } ],

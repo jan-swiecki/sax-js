@@ -80,9 +80,9 @@ iExpect.push([
 ])
 iExpect.push([ 'closetag', 'a' ])
 
-var parser = import index from "./index.js";
+var parser = 
 
-index.test({
+require(__dirname).test({
   strict: true,
   expect: iExpect
 })

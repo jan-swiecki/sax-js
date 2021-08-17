@@ -1,6 +1,6 @@
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: "<root length='12345'></root>",
   expect: [
     [
@@ -52,9 +52,9 @@ index.test({
   }
 })
 
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: "<root length='12345'></root>",
   expect: [
     [

@@ -1,6 +1,6 @@
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: '<span id="hello" id="there"></span>',
   expect: [
     [ 'opentagstart', {

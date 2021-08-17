@@ -1,5 +1,7 @@
 import { EventEmitter } from 'stream';
 
+// import { EventEmitter } from 'stream';
+
 
 import _ from "lodash"
 
@@ -198,6 +200,8 @@ sax.XML_ENTITIES = {
 }
 
 sax.ENTITIES = _.clone(SAXEntities);
+
+export const ENTITIES = sax.ENTITIES;
 
 
 function textopts (opt, text) {

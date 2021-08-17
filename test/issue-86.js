@@ -1,6 +1,6 @@
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: '<root>abc</root>de<f',
   expect: [
     [
@@ -35,9 +35,9 @@ index.test({
   opt: {}
 })
 
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: '<root>abc</root>de<f',
   expect: [
     [

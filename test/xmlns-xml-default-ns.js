@@ -14,9 +14,9 @@ var attrAttr = {
   uri: ''
 }
 
-import index from "./index.js";
 
-index.test({
+
+require(__dirname).test({
   xml: "<elm xmlns='http://foo' attr='bar'/>",
   expect: [
     [

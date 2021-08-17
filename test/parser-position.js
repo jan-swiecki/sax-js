@@ -1,14 +1,15 @@
-var sax = require('../lib/sax')
-var tap = require('tap')
+const { SAXParser } = require('../lib/SAXParser.js')
+
+const tap = require('tap')
 
 function testPosition (chunks, expectedEvents) {
-  var parser = sax.parser()
+  var parser = new SAXParser()
   expectedEvents.forEach(function (expectation) {
-    parser['on' + expectation[0]] = function () {
+    parser.on(expectation[0], function () {
       for (var prop in expectation[1]) {
         tap.equal(parser[prop], expectation[1][prop])
       }
-    }
+    })
   })
   chunks.forEach(function (chunk) {
     parser.write(chunk)
@@ -16,15 +17,15 @@ function testPosition (chunks, expectedEvents) {
 }
 
 testPosition(['<div>abcdefgh</div>'], [
-  [ 'opentagstart', { position: 5, startTagPosition: 1 } ],
-  [ 'opentag', { position: 5, startTagPosition: 1 } ],
-  [ 'text', { position: 19, startTagPosition: 14 } ],
-  [ 'closetag', { position: 19, startTagPosition: 14 } ]
+  [ 'onopentagstart', { position: 5, startTagPosition: 1 } ],
+  [ 'onopentag', { position: 5, startTagPosition: 1 } ],
+  [ 'ontext', { position: 19, startTagPosition: 14 } ],
+  [ 'onclosetag', { position: 19, startTagPosition: 14 } ]
 ])
 
 testPosition(['<div>abcde', 'fgh</div>'], [
-  ['opentagstart', { position: 5, startTagPosition: 1 }],
-  ['opentag', { position: 5, startTagPosition: 1 }],
-  ['text', { position: 19, startTagPosition: 14 }],
-  ['closetag', { position: 19, startTagPosition: 14 }]
+  ['onopentagstart', { position: 5, startTagPosition: 1 }],
+  ['onopentag', { position: 5, startTagPosition: 1 }],
+  ['ontext', { position: 19, startTagPosition: 14 }],
+  ['onclosetag', { position: 19, startTagPosition: 14 }]
 ])

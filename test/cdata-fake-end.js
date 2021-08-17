@@ -1,6 +1,6 @@
-var p = import index from "./index.js";
+var p = 
 
-index.test({
+require(__dirname).test({
   expect: [
     ['opentagstart', {'name': 'R', 'attributes': {}}],
     ['opentag', {'name': 'R', 'attributes': {}, 'isSelfClosing': false}],
@@ -16,9 +16,9 @@ for (var i = 0; i < x.length; i++) {
 }
 p.close()
 
-var p2 = import index from "./index.js";
+var p2 = 
 
-index.test({
+require(__dirname).test({
   expect: [
     ['opentagstart', {'name': 'R', 'attributes': {}}],
     ['opentag', {'name': 'R', 'attributes': {}, 'isSelfClosing': false}],

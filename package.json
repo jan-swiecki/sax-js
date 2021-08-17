@@ -3,9 +3,9 @@
   "description": "An evented streaming XML parser in JavaScript",
   "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
   "version": "1.2.4",
-  "main": "lib/sax.js",
+  "main": "dist/lib/sax.cjs",
+  "type": "commonjs",
   "license": "ISC",
-  "type": "module",
   "scripts": {
     "test": "tap test/*.js --cov -j4",
     "posttest": "standard -F test/*.js lib/*.js",
@@ -15,9 +15,7 @@
   },
   "repository": "git://github.com/isaacs/sax-js.git",
   "files": [
-    "lib/sax.js",
-    "LICENSE",
-    "README.md"
+    "/dist"
   ],
   "devDependencies": {
     "@types/lodash": "^4.14.172",
