@@ -3,8 +3,6 @@ import SAXEntities from "./SAXEntities"
 import xmlBeautifier from './xml-beautifier';
 import { EventEmitter } from 'stream';
 
-const MAX_BUFFER_LENGTH = 64 * 1024
-
 type Attribute = {
   name: string,
   value: string,
@@ -258,6 +256,8 @@ type BufferName = 'comment' | 'sgmlDecl' | 'textNode' | 'tagName' | 'doctype'
   | 'attribValue' | 'cdata' | 'script'
 
 export class SAXParser extends EventEmitter implements Record<BufferName, string> {
+  private MAX_BUFFER_LENGTH = 64 * 1024
+
   sawRoot: boolean;
   closedRoot: any;
   state: any;
@@ -312,10 +312,15 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
     }
   }
 
+  setMaxBufferLength(value: number) {
+    this.MAX_BUFFER_LENGTH = value
+  }
+
   reset() {
     this.clearBuffers()
     this.q = this.c = ''
-    this.bufferCheckPosition = MAX_BUFFER_LENGTH
+    this.MAX_BUFFER_LENGTH = this.opt?.MAX_BUFFER_LENGTH || this.MAX_BUFFER_LENGTH
+    this.bufferCheckPosition = this.MAX_BUFFER_LENGTH
     this.opt = this.opt || {}
     this.opt.lowercase = this.opt.lowercase || this.opt.lowercasetags
     this.looseCase = this.opt.lowercase ? 'toLowerCase' : 'toUpperCase'
@@ -1122,7 +1127,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
   }
   
   private checkBufferLength () {
-    var maxAllowed = Math.max(MAX_BUFFER_LENGTH, 10)
+    var maxAllowed = Math.max(this.MAX_BUFFER_LENGTH, 10)
     var maxActual = 0
     for (var i = 0, l = buffers.length; i < l; i++) {
       var len = this[buffers[i]].length
@@ -1153,7 +1158,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
       maxActual = Math.max(maxActual, len)
     }
     // schedule the next check for the earliest possible buffer overrun.
-    var m = MAX_BUFFER_LENGTH - maxActual
+    var m = this.MAX_BUFFER_LENGTH - maxActual
     this.bufferCheckPosition = m + this.position
   }
 
