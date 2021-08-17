@@ -35,7 +35,7 @@ export function test (options) {
       if (ev === 'onerror') {
         t.equal(n.message, expect[e][1])
       } else {
-        t.deepEqual(n, expect[e][1])
+        t.same(n, expect[e][1])
       }
       e++
       if (ev === 'onerror') {
