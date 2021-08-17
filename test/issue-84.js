@@ -1,5 +1,7 @@
 // https://github.com/isaacs/sax-js/issues/49
-require(__dirname).test({
+import index from "./index.js";
+
+index.test({
   xml: '<?has unbalanced "quotes?><xml>body</xml>',
   expect: [
     [ 'processinginstruction', { name: 'has', body: 'unbalanced "quotes' } ],

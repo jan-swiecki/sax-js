@@ -1,7 +1,12 @@
-import _ from "lodash"
-import SAXEntities from "./SAXEntities"
-import xmlBeautifier from './xml-beautifier';
 import { EventEmitter } from 'stream';
+
+
+import _ from "lodash"
+
+
+import SAXEntities from "./SAXEntities.js"
+import xmlBeautifier from './xml-beautifier.js';
+
 
 type Attribute = {
   name: string,

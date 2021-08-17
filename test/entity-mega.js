@@ -6,7 +6,9 @@ for (var i in sax.ENTITIES) {
   text += sax.ENTITIES[i]
 }
 xml += '</r>'
-require(__dirname).test({
+import index from "./index.js";
+
+index.test({
   xml: xml,
   expect: [
     ['opentagstart', {'name': 'R', attributes: {}}],

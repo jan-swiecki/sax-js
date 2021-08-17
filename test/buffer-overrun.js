@@ -1,4 +1,6 @@
-require(__dirname).test({
+import index from "./index.js";
+
+index.test({
   opt: {
     // set this really low so that I don't have to put 64 MB of xml in here.
     MAX_BUFFER_LENGTH: 5

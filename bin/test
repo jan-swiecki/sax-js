@@ -1,0 +1,6 @@
+#!/bin/bash
+set -eo pipefail
+
+bin/build
+cd dist
+npm run test

@@ -1,4 +1,6 @@
-require(__dirname).test({
+import index from "./index.js";
+
+index.test({
   expect: [
     ['opentagstart', {'name': 'R', 'attributes': {}}],
     ['opentag', {'name': 'R', 'attributes': {}, 'isSelfClosing': false}],

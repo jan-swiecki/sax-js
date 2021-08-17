@@ -1,5 +1,7 @@
 // default to uppercase
-require(__dirname).test({
+import index from "./index.js";
+
+index.test({
   xml: '<span class="test" hello="world"></span>',
   expect: [
     [ 'opentagstart', {
@@ -20,7 +22,9 @@ require(__dirname).test({
 })
 
 // lowercase option : lowercase tag/attribute names
-require(__dirname).test({
+import index from "./index.js";
+
+index.test({
   xml: '<span class="test" hello="world"></span>',
   expect: [
     [ 'opentagstart', {
@@ -41,7 +45,9 @@ require(__dirname).test({
 })
 
 // backward compatibility with old lowercasetags opt
-require(__dirname).test({
+import index from "./index.js";
+
+index.test({
   xml: '<span class="test" hello="world"></span>',
   expect: [
     [ 'opentagstart', {

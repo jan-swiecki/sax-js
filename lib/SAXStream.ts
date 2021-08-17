@@ -1,10 +1,14 @@
 import { Duplex } from "stream"
-import { NodeTypes, SAXParser, NodeType } from './SAXParser';
+
+
+import { NodeTypes, SAXParser, NodeType } from './SAXParser.js';
+
 
 export type SAXData = {
   nodeType: NodeType,
   data?: any
 }
+
 
 export class SAXStream extends Duplex {
   private _parser: SAXParser

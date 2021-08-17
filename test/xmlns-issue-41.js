@@ -1,4 +1,6 @@
-var t = require(__dirname)
+var t = import index from "./index.js";
+
+index
 
 // should be the same both ways.
 var xmls = [

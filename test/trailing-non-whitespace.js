@@ -1,4 +1,6 @@
-require(__dirname).test({
+import index from "./index.js";
+
+index.test({
   xml: '<span>Welcome,</span> to monkey land',
   expect: [
     ['opentagstart', {

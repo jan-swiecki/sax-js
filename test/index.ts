@@ -1,5 +1,4 @@
-import { EventTypes, SAXParser } from '../lib/SAXParser';
-import { SAXStream } from '../lib/SAXStream';
+import { EventTypes, SAXParser, SAXStream  } from '../lib/sax.js';
 import t from 'tap'
 
 // handy way to do simple unit tests

@@ -13,6 +13,7 @@ esbuild \
   --platform=node \
   --outdir=dist \
   lib/sax.ts test/*.ts
+  # --out-extension:.js=.mjs \
 
 for x in lib test; do
   if [ -d "$x" ]; then

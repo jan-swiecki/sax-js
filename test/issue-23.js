@@ -1,4 +1,6 @@
-require(__dirname).test({
+import index from "./index.js";
+
+index.test({
   xml: '<compileClassesResponse>' +
     '<result>' +
     '<bodyCrc>653724009</bodyCrc>' +

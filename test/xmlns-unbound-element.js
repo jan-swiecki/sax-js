@@ -1,4 +1,6 @@
-require(__dirname).test({
+import index from "./index.js";
+
+index.test({
   strict: true,
   opt: { xmlns: true },
   expect: [
@@ -33,7 +35,9 @@ require(__dirname).test({
   ]
 }).write('<unbound:root/>')
 
-require(__dirname).test({
+import index from "./index.js";
+
+index.test({
   strict: true,
   opt: {
     xmlns: true

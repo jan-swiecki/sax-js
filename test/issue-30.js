@@ -1,5 +1,7 @@
 // https://github.com/isaacs/sax-js/issues/33
-require(__dirname).test({
+import index from "./index.js";
+
+index.test({
   xml: '<xml>\n' +
     '<!-- \n' +
     '  comment with a single dash- in it\n' +
