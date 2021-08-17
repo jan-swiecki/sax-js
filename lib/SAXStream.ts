@@ -1,4 +1,5 @@
 import { Duplex, Transform } from "stream"
+import { StringDecoder } from "string_decoder";
 
 
 import { NodeTypes, SAXParser, NodeType } from './SAXParser.js';
@@ -13,6 +14,7 @@ export type SAXDataEvent = {
 export class SAXStream extends Transform {
   private _parser: SAXParser
   private buffer: SAXDataEvent[] = []
+  private _decoder = new StringDecoder('utf8')
 
   constructor(strict: boolean = false, opt = {}) {
     super({
@@ -83,11 +85,34 @@ export class SAXStream extends Transform {
   _write(chunk, encoding, callback) {
     // The underlying source only deals with strings.
     if (Buffer.isBuffer(chunk)) {
-      chunk = chunk.toString();
+      // console.log(`chunk before:`, chunk, chunk.length)
+      chunk = this._decoder.write(chunk)
+      // console.log(`chunk:`, chunk, chunk.length)
+      // const end = this._decoder.end()
+      // if(end.length > 0) {
+      //   throw new Error(`Error: unsupported partial chunks of unicode strings, string decoder 'end' method returned non-zero length string from internal buffer: ${end}`)
+      // }
     }
-    this._parser.write(chunk)
+    this._parser.write(chunk.toString())
     callback();
   }
+
+  // SAXStream.prototype.write = function (data) {
+  //   if (typeof Buffer === 'function' &&
+  //     typeof Buffer.isBuffer === 'function' &&
+  //     Buffer.isBuffer(data)) {
+  //     if (!this._decoder) {
+  //       var SD = require('string_decoder').StringDecoder
+  //       this._decoder = new SD('utf8')
+  //     }
+  //     data = this._decoder.write(data)
+  //   }
+
+  //   this._parser.write(data.toString())
+  //   this.emit('data', data)
+  //   return true
+  // }
+
 
   // SAXStream.prototype.end = function (chunk) {
   _final(callback) {

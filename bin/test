@@ -7,7 +7,7 @@ npm run test
 # ../node_modules/.bin/tap test/case.js
 # node test/case.js
 
-  # --branches=<n>         what % of branches must be covered?
-  # --functions=<n>        what % of functions must be covered?
-  # --lines=<n>            what % of lines must be covered?
-  # --statements=<n>       what % of statements must be covered?
+# --branches=<n>         what % of branches must be covered?
+# --functions=<n>        what % of functions must be covered?
+# --lines=<n>            what % of lines must be covered?
+# --statements=<n>       what % of statements must be covered?
