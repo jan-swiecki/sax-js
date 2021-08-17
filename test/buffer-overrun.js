@@ -1,5 +1,4 @@
 
-
 require(__dirname).test({
   opt: {
     // set this really low so that I don't have to put 64 MB of xml in here.
@@ -10,13 +9,13 @@ require(__dirname).test({
     ['error', 'Max buffer length exceeded: tagName\nLine: 0\nColumn: 30\nChar: '],
     ['error', 'Max buffer length exceeded: tagName\nLine: 0\nColumn: 45\nChar: '],
     ['opentagstart', {
-      'name': 'ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ',
-      'attributes': {}
+      name: 'ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ',
+      attributes: {}
     }],
     ['opentag', {
-      'name': 'ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ',
-      'attributes': {},
-      'isSelfClosing': false
+      name: 'ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ',
+      attributes: {},
+      isSelfClosing: false
     }],
     ['text', 'yo'],
     ['closetag', 'ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ']

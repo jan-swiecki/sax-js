@@ -3,9 +3,9 @@ set -eo pipefail
 
 rm -rf dist
 
-  # --external:tap \
-  # --external:lodash \
-  # --bundle \
+# --external:tap \
+# --external:lodash \
+# --bundle \
 
 esbuild="esbuild \
   --log-level=warning \
@@ -13,7 +13,6 @@ esbuild="esbuild \
   --target=node10 \
   --platform=node \
   --outdir=dist"
-
 
 # $esbuild --format=cjs --bundle lib/sax.ts
 $esbuild --format=cjs --outdir=dist lib/*.ts test/*

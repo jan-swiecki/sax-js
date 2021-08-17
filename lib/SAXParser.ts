@@ -68,11 +68,11 @@ export const EventTypes: EventType[] = (NodeTypes as EventType[]).concat(['onrea
 
 // this really needs to be replaced with character classes.
 // XML allows all manner of ridiculous numbers and digits.
-var CDATA = '[CDATA['
-var DOCTYPE = 'DOCTYPE'
-var XML_NAMESPACE = 'http://www.w3.org/XML/1998/namespace'
-var XMLNS_NAMESPACE = 'http://www.w3.org/2000/xmlns/'
-var rootNS = { xml: XML_NAMESPACE, xmlns: XMLNS_NAMESPACE }
+let CDATA = '[CDATA['
+let DOCTYPE = 'DOCTYPE'
+let XML_NAMESPACE = 'http://www.w3.org/XML/1998/namespace'
+let XMLNS_NAMESPACE = 'http://www.w3.org/2000/xmlns/'
+let rootNS = { xml: XML_NAMESPACE, xmlns: XMLNS_NAMESPACE }
 
 // http://www.w3.org/TR/REC-xml/#NT-NameStartChar
 // This implementation works on strings, a single character at a time
@@ -80,12 +80,12 @@ var rootNS = { xml: XML_NAMESPACE, xmlns: XMLNS_NAMESPACE }
 // without a significant breaking change to either this  parser, or the
 // JavaScript language.  Implementation of an emoji-capable xml parser
 // is left as an exercise for the reader.
-var nameStart = /[:_A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]/
+let nameStart = /[:_A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]/
 
-var nameBody = /[:_A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\u00B7\u0300-\u036F\u203F-\u2040.\d-]/
+let nameBody = /[:_A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\u00B7\u0300-\u036F\u203F-\u2040.\d-]/
 
-var entityStart = /[#:_A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]/
-var entityBody = /[#:_A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\u00B7\u0300-\u036F\u203F-\u2040.\d-]/
+let entityStart = /[#:_A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]/
+let entityBody = /[#:_A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\u00B7\u0300-\u036F\u203F-\u2040.\d-]/
 
 function isWhitespace (c) {
   return c === ' ' || c === '\n' || c === '\r' || c === '\t'
@@ -212,10 +212,10 @@ function textopts (opt, text) {
 
 
 function qname (name, attribute?) {
-  var i = name.indexOf(':')
-  var qualName = i < 0 ? [ '', name ] : name.split(':')
-  var prefix = qualName[0]
-  var local = qualName[1]
+  let i = name.indexOf(':')
+  let qualName = i < 0 ? [ '', name ] : name.split(':')
+  let prefix = qualName[0]
+  let local = qualName[1]
 
   // <x "xmlns"="http://foo">
   if (attribute && name === 'xmlns') {
@@ -229,7 +229,7 @@ function qname (name, attribute?) {
 
 
 function charAt (chunk, i) {
-  var result = ''
+  let result = ''
   if (i < chunk.length) {
     result = chunk.charAt(i)
   }
@@ -242,12 +242,12 @@ function fix_indent(xml) {
 
 
 Object.keys(sax.ENTITIES).forEach(function (key) {
-  var e = sax.ENTITIES[key]
-  var s = typeof e === 'number' ? String.fromCharCode(e) : e
+  let e = sax.ENTITIES[key]
+  let s = typeof e === 'number' ? String.fromCharCode(e) : e
   sax.ENTITIES[key] = s
 })
 
-for (var s in sax.STATE) {
+for (let s in sax.STATE) {
   sax.STATE[sax.STATE[s]] = s
 }
 
@@ -316,7 +316,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
   }
 
   private clearBuffers () {
-    for (var i = 0, l = buffers.length; i < l; i++) {
+    for (let i = 0, l = buffers.length; i < l; i++) {
       this[buffers[i]] = ''
     }
   }
@@ -434,8 +434,8 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
     if (typeof chunk === 'object') {
       chunk = chunk.toString()
     }
-    var i = 0
-    var c = ''
+    let i = 0
+    let c = ''
     while (true) {
       c = charAt(chunk, i++)
       this.c = c
@@ -475,7 +475,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
 
         case S.TEXT:
           if (this.sawRoot && !this.closedRoot) {
-            var starti = i - 1
+            let starti = i - 1
             while (c && c !== '<' && c !== '&') {
               c = charAt(chunk, i++)
               if(this.rawTagTracking) {
@@ -548,7 +548,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
             this.strictFail('Unencoded <')
             // if there was some whitespace, then add that in.
             if (this.startTagPosition + 1 < this.position) {
-              var pad = this.position - this.startTagPosition
+              let pad = this.position - this.startTagPosition
               c = new Array(pad).join(' ') + c
             }
             this.textNode += '<' + c
@@ -929,8 +929,8 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
         case S.TEXT_ENTITY:
         case S.ATTRIB_VALUE_ENTITY_Q:
         case S.ATTRIB_VALUE_ENTITY_U:
-          var returnState
-          var buffer
+          let returnState
+          let buffer
           switch (this.state) {
             case S.TEXT_ENTITY:
               returnState = S.TEXT
@@ -977,10 +977,10 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
   openTag (selfClosing?) {
     if (this.opt.xmlns) {
       // emit namespace binding events
-      var tag = this.tag
+      let tag = this.tag
 
       // add namespace info to tag
-      var qn = qname(this.tagName)
+      let qn = qname(this.tagName)
       tag.prefix = qn.prefix
       tag.local = qn.local
       tag.uri = tag.ns[qn.prefix] || ''
@@ -991,7 +991,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
         tag.uri = qn.prefix
       }
 
-      var parent = this.tags[this.tags.length - 1] || this
+      let parent = this.tags[this.tags.length - 1] || this
       if (tag.ns && parent.ns !== tag.ns) {
         Object.keys(tag.ns).forEach(p => {
           this.emitNode('onopennamespace', {
@@ -1004,15 +1004,15 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
       // handle deferred onattribute events
       // Note: do not apply default ns to attributes:
       //   http://www.w3.org/TR/REC-xml-names/#defaulting
-      for (var i = 0, l = this.attribList.length; i < l; i++) {
-        var nv = this.attribList[i]
-        var name = nv[0]
-        var value = nv[1]
-        var qualName = qname(name, true)
-        var prefix = qualName.prefix
-        var local = qualName.local
-        var uri = prefix === '' ? '' : (tag.ns[prefix] || '')
-        var a = {
+      for (let i = 0, l = this.attribList.length; i < l; i++) {
+        let nv = this.attribList[i]
+        let name = nv[0]
+        let value = nv[1]
+        let qualName = qname(name, true)
+        let prefix = qualName.prefix
+        let local = qualName.local
+        let uri = prefix === '' ? '' : (tag.ns[prefix] || '')
+        let a = {
           name: name,
           value: value,
           prefix: prefix,
@@ -1075,14 +1075,14 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
   
     // first make sure that the closing tag actually exists.
     // <a><b></c></b></a> will close everything, otherwise.
-    var t = this.tags.length
-    var tagName = this.tagName
+    let t = this.tags.length
+    let tagName = this.tagName
     if (!this.strict) {
       tagName = tagName[this.looseCase]()
     }
-    var closeTo = tagName
+    let closeTo = tagName
     while (t--) {
-      var close = this.tags[t]
+      let close = this.tags[t]
       if (close.name !== closeTo) {
         // fail the first time in strict mode
         this.strictFail('Unexpected close tag')
@@ -1099,9 +1099,9 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
       return
     }
     this.tagName = tagName
-    var s = this.tags.length
+    let s = this.tags.length
     while (s-- > t) {
-      var tag = this.tag = this.tags.pop()
+      let tag = this.tag = this.tags.pop()
       this.tagName = this.tag.name
       // console.log('close:', parser.path.join('/'))
       if(this.opt.extractRawTagContentEnabled && this.path.join('/') === this.opt.extractRawTagContent) {
@@ -1115,16 +1115,16 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
       this.path.pop()
       this.emitNode('onclosetag', this.tagName)
   
-      var x = {}
-      for (var i in tag.ns) {
+      let x = {}
+      for (let i in tag.ns) {
         x[i] = tag.ns[i]
       }
   
-      var parent = this.tags[this.tags.length - 1] || this
+      let parent = this.tags[this.tags.length - 1] || this
       if (this.opt.xmlns && tag.ns !== parent.ns) {
         // remove namespace bindings introduced by tag
         Object.keys(tag.ns).forEach(p => {
-          var n = tag.ns[p]
+          let n = tag.ns[p]
           this.emitNode('onclosenamespace', { prefix: p, uri: n })
         })
       }
@@ -1136,10 +1136,10 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
   }
   
   private checkBufferLength () {
-    var maxAllowed = Math.max(this.MAX_BUFFER_LENGTH, 10)
-    var maxActual = 0
-    for (var i = 0, l = buffers.length; i < l; i++) {
-      var len = this[buffers[i]].length
+    let maxAllowed = Math.max(this.MAX_BUFFER_LENGTH, 10)
+    let maxActual = 0
+    for (let i = 0, l = buffers.length; i < l; i++) {
+      let len = this[buffers[i]].length
       if (len > maxAllowed) {
         // Text/cdata nodes can get big, and since they're buffered,
         // we can get here under normal conditions.
@@ -1167,14 +1167,14 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
       maxActual = Math.max(maxActual, len)
     }
     // schedule the next check for the earliest possible buffer overrun.
-    var m = this.MAX_BUFFER_LENGTH - maxActual
+    let m = this.MAX_BUFFER_LENGTH - maxActual
     this.bufferCheckPosition = m + this.position
   }
 
   private newTag () {
     if (!this.strict) this.tagName = this.tagName[this.looseCase]()
-    var parent = this.tags[this.tags.length - 1] || this
-    var tag: Tag = this.tag = { name: this.tagName, attributes: {} }
+    let parent = this.tags[this.tags.length - 1] || this
+    let tag: Tag = this.tag = { name: this.tagName, attributes: {} }
   
     // will be overridden if tag contails an xmlns="foo" or xmlns:foo="bar"
     if (this.opt.xmlns) {
@@ -1225,9 +1225,9 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
     }
   
     if (this.opt.xmlns) {
-      var qn = qname(this.attribName, true)
-      var prefix = qn.prefix
-      var local = qn.local
+      let qn = qname(this.attribName, true)
+      let prefix = qn.prefix
+      let local = qn.local
   
       if (prefix === 'xmlns') {
         // namespace binding attribute. push the binding into scope
@@ -1240,8 +1240,8 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
             'xmlns: prefix must be bound to ' + XMLNS_NAMESPACE + '\n' +
             'Actual: ' + this.attribValue)
         } else {
-          var tag = this.tag
-          var parent = this.tags[this.tags.length - 1] || this
+          let tag = this.tag
+          let parent = this.tags[this.tags.length - 1] || this
           if (tag.ns === parent.ns) {
             tag.ns = Object.create(parent.ns)
           }
@@ -1266,10 +1266,10 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
   }
  
   private parseEntity() {
-    var entity = this.entity
-    var entityLC = entity.toLowerCase()
-    var num
-    var numStr = ''
+    let entity = this.entity
+    let entityLC = entity.toLowerCase()
+    let num
+    let numStr = ''
   
     if (this.ENTITIES[entity]) {
       return this.ENTITIES[entity]

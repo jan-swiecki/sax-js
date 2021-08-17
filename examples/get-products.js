@@ -1,22 +1,22 @@
 // pull out /GeneralSearchResponse/categories/category/items/product tags
 // the rest we don't care about.
 
-var sax = require('../lib/sax.js')
-var fs = require('fs')
-var path = require('path')
-var xmlFile = path.resolve(__dirname, 'shopping.xml')
-var util = require('util')
-var http = require('http')
+let sax = require('../lib/sax.js')
+let fs = require('fs')
+let path = require('path')
+let xmlFile = path.resolve(__dirname, 'shopping.xml')
+let util = require('util')
+let http = require('http')
 
 fs.readFile(xmlFile, function (er, d) {
   http.createServer(function (req, res) {
     if (er) throw er
-    var xmlstr = d.toString('utf8')
+    let xmlstr = d.toString('utf8')
 
-    var parser = sax.parser(true)
-    var products = []
-    var product = null
-    var currentTag = null
+    let parser = sax.parser(true)
+    let products = []
+    let product = null
+    let currentTag = null
 
     parser.onclosetag = function (tagName) {
       if (tagName === 'product') {
@@ -25,7 +25,7 @@ fs.readFile(xmlFile, function (er, d) {
         return
       }
       if (currentTag && currentTag.parent) {
-        var p = currentTag.parent
+        let p = currentTag.parent
         delete currentTag.parent
         currentTag = p
       }
@@ -47,7 +47,7 @@ fs.readFile(xmlFile, function (er, d) {
     }
 
     parser.onend = function () {
-      var out = util.inspect(products, false, 3, true)
+      let out = util.inspect(products, false, 3, true)
       res.writeHead(200, {'content-type': 'application/json'})
       res.end('{"ok":true}')
     // res.end(JSON.stringify(products))

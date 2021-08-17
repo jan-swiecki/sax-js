@@ -1,5 +1,4 @@
 
-
 require(__dirname).test({
   xml: '<root xmlns:x="x1" xmlns:y="y1" x:a="x1" y:a="y1">' +
     '<rebind xmlns:x="x2">' +

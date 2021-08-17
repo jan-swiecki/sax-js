@@ -3,7 +3,7 @@ import tap = require("tap")
 import { SAXDataEvent, SAXStream } from "../lib/SAXStream"
 
 
-var saxStream = new SAXStream()
+let saxStream = new SAXStream()
 
 saxStream.emitAllNodeTypes()
 

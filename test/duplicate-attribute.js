@@ -1,19 +1,18 @@
 
-
 require(__dirname).test({
   xml: '<span id="hello" id="there"></span>',
   expect: [
-    [ 'opentagstart', {
+    ['opentagstart', {
       name: 'SPAN',
       attributes: {}
-    } ],
-    [ 'attribute', { name: 'ID', value: 'hello' } ],
-    [ 'opentag', {
+    }],
+    ['attribute', { name: 'ID', value: 'hello' }],
+    ['opentag', {
       name: 'SPAN',
       attributes: { ID: 'hello' },
       isSelfClosing: false
-    } ],
-    [ 'closetag', 'SPAN' ]
+    }],
+    ['closetag', 'SPAN']
   ],
   strict: false,
   opt: {}

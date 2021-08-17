@@ -1,26 +1,26 @@
-var iExpect = []
-var myAttributes = {}
-var ENTITIES = {}
+const iExpect = []
+const myAttributes = {}
+const ENTITIES = {}
 
 // generates xml like test0="&control;"
-var entitiesToTest = {
+const entitiesToTest = {
   // 'ENTITY_NAME': IS_VALID || [invalidCharPos, invalidChar],
-  'control0': true, // This is a vanilla control.
+  control0: true, // This is a vanilla control.
   // entityStart
-  '_uscore': true,
+  _uscore: true,
   '#hash': true,
   ':colon': true,
   '-bad': [0, '-'],
   '.bad': [0, '.'],
   // general entity
-  'u_score': true,
+  u_score: true,
   'd-ash': true,
   'd.ot': true,
   'all:_#-.': true
 }
 
-var xmlStart = '<a test="&amp;" '
-var xmlEnd = '/>'
+let xmlStart = '<a test="&amp;" '
+const xmlEnd = '/>'
 
 iExpect.push([
   'opentagstart',
@@ -37,13 +37,13 @@ iExpect.push([
     value: '&'
   }
 ])
-myAttributes['test'] = '&'
+myAttributes.test = '&'
 
-var entI = 0
+let entI = 0
 
-for (var entity in entitiesToTest) {
-  var attribName = 'test' + entI
-  var attribValue = 'Testing ' + entity
+for (const entity in entitiesToTest) {
+  const attribName = 'test' + entI
+  const attribValue = 'Testing ' + entity
 
   // add the first part to use in calculation below
   xmlStart += attribName + '="' + '&'
@@ -78,16 +78,16 @@ iExpect.push([
     isSelfClosing: true
   }
 ])
-iExpect.push([ 'closetag', 'a' ])
+iExpect.push(['closetag', 'a'])
 
-var parser = 
+const parser =
 
 require(__dirname).test({
   strict: true,
   expect: iExpect
 })
 
-for (entity in entitiesToTest) {
+for (const entity in entitiesToTest) {
   parser.ENTITIES[entity] = ENTITIES[entity]
 }
 

@@ -1,5 +1,4 @@
 
-
 require(__dirname).test({
   xml: "<root length='12345'></root>",
   expect: [
@@ -51,8 +50,6 @@ require(__dirname).test({
     xmlns: true
   }
 })
-
-
 
 require(__dirname).test({
   xml: "<root length='12345'></root>",

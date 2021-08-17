@@ -5,10 +5,10 @@ import t from 'tap'
 // if the options contains an xml string, it'll be written and the parser closed.
 // otherwise, it's assumed that the test will write and close.
 export function test (options) {
-  var xml = options.xml
-  var parser = new SAXParser(options.strict, options.opt)
-  var expect = options.expect
-  var e = 0
+  let xml = options.xml
+  let parser = new SAXParser(options.strict, options.opt)
+  let expect = options.expect
+  let e = 0
   EventTypes.forEach(function (ev) {
     parser.on(ev, function (n) {
       if (process.env.DEBUG) {

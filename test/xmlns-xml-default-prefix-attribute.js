@@ -1,5 +1,4 @@
 
-
 require(__dirname).test({
   xml: "<root xml:lang='en'/>",
   expect: [

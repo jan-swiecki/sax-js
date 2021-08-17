@@ -1,5 +1,4 @@
 
-
 require(__dirname).test({
   xml: '<root>' +
     '<plain attr="normal" />' +
@@ -58,7 +57,7 @@ require(__dirname).test({
         local: 'plain',
         uri: '',
         attributes: {
-          'attr': {
+          attr: {
             name: 'attr',
             value: 'normal',
             prefix: '',
@@ -107,7 +106,7 @@ require(__dirname).test({
         local: 'ns1',
         uri: 'uri:default',
         attributes: {
-          'xmlns': {
+          xmlns: {
             name: 'xmlns',
             value: 'uri:default',
             prefix: 'xmlns',
@@ -152,7 +151,7 @@ require(__dirname).test({
           '': 'uri:default'
         },
         attributes: {
-          'attr': {
+          attr: {
             name: 'attr',
             value: 'normal',
             prefix: '',
@@ -253,7 +252,7 @@ require(__dirname).test({
         local: 'plain',
         uri: '',
         attributes: {
-          'attr': {
+          attr: {
             name: 'attr',
             value: 'normal',
             prefix: '',

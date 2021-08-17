@@ -1,5 +1,4 @@
 
-
 require(__dirname).test({
   xml: "<xml:root xmlns:xml='ERROR'/>",
   expect: [

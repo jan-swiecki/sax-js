@@ -1,4 +1,4 @@
-var xmlnsAttr = {
+const xmlnsAttr = {
   name: 'xmlns',
   value: 'http://foo',
   prefix: 'xmlns',
@@ -6,15 +6,13 @@ var xmlnsAttr = {
   uri: 'http://www.w3.org/2000/xmlns/'
 }
 
-var attrAttr = {
+const attrAttr = {
   name: 'attr',
   value: 'bar',
   prefix: '',
   local: 'attr',
   uri: ''
 }
-
-
 
 require(__dirname).test({
   xml: "<elm xmlns='http://foo' attr='bar'/>",

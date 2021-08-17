@@ -1,5 +1,4 @@
 
-
 require(__dirname).test({
   xml: '<root>abc</root>de<f',
   expect: [
@@ -34,8 +33,6 @@ require(__dirname).test({
   strict: false,
   opt: {}
 })
-
-
 
 require(__dirname).test({
   xml: '<root>abc</root>de<f',

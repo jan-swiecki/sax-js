@@ -1,5 +1,4 @@
 
-
 require(__dirname).test({
   strict: true,
   opt: { xmlns: true },
@@ -34,8 +33,6 @@ require(__dirname).test({
     ]
   ]
 }).write('<unbound:root/>')
-
-
 
 require(__dirname).test({
   strict: true,
@@ -85,7 +82,7 @@ require(__dirname).test({
           }
         },
         ns: {
-          'unbound': 'someuri'
+          unbound: 'someuri'
         },
         isSelfClosing: true
       }

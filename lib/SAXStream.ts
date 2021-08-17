@@ -102,7 +102,7 @@ export class SAXStream extends Transform {
   //     typeof Buffer.isBuffer === 'function' &&
   //     Buffer.isBuffer(data)) {
   //     if (!this._decoder) {
-  //       var SD = require('string_decoder').StringDecoder
+  //       let SD = require('string_decoder').StringDecoder
   //       this._decoder = new SD('utf8')
   //     }
   //     data = this._decoder.write(data)

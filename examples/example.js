@@ -1,4 +1,4 @@
-var fs = require('fs'),
+let fs = require('fs'),
   util = require('util'),
   path = require('path'),
   xml = fs.readFileSync(path.join(__dirname, 'test.xml'), 'utf8'),
@@ -20,7 +20,7 @@ loose.onend = function () {
 // do this in random bits at a time to verify that it works.
 (function () {
   if (xml) {
-    var c = Math.ceil(Math.random() * 1000)
+    let c = Math.ceil(Math.random() * 1000)
     loose.write(xml.substr(0, c))
     xml = xml.substr(c)
     process.nextTick(arguments.callee)

@@ -1,5 +1,4 @@
 
-
 require(__dirname).test({
   xml: '<root>   ' +
     '<haha /> ' +
@@ -9,18 +8,18 @@ require(__dirname).test({
     '</monkey>' +
     '</root>  ',
   expect: [
-    ['opentagstart', {name: 'ROOT', attributes: {}}],
-    ['opentag', {name: 'ROOT', attributes: {}, isSelfClosing: false}],
-    ['opentagstart', {name: 'HAHA', attributes: {}}],
-    ['opentag', {name: 'HAHA', attributes: {}, isSelfClosing: true}],
+    ['opentagstart', { name: 'ROOT', attributes: {} }],
+    ['opentag', { name: 'ROOT', attributes: {}, isSelfClosing: false }],
+    ['opentagstart', { name: 'HAHA', attributes: {} }],
+    ['opentag', { name: 'HAHA', attributes: {}, isSelfClosing: true }],
     ['closetag', 'HAHA'],
-    ['opentagstart', {name: 'HAHA', attributes: {}}],
-    ['opentag', {name: 'HAHA', attributes: {}, isSelfClosing: true}],
+    ['opentagstart', { name: 'HAHA', attributes: {} }],
+    ['opentag', { name: 'HAHA', attributes: {}, isSelfClosing: true }],
     ['closetag', 'HAHA'],
     // ["opentag", {name:"HAHA", attributes:{}}],
     // ["closetag", "HAHA"],
-    ['opentagstart', {name: 'MONKEY', attributes: {}}],
-    ['opentag', {name: 'MONKEY', attributes: {}, isSelfClosing: false}],
+    ['opentagstart', { name: 'MONKEY', attributes: {} }],
+    ['opentag', { name: 'MONKEY', attributes: {}, isSelfClosing: false }],
     ['text', '=(|)'],
     ['closetag', 'MONKEY'],
     ['closetag', 'ROOT']

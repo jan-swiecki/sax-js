@@ -7,8 +7,8 @@
   "type": "commonjs",
   "license": "ISC",
   "scripts": {
-    "test": "tap test/*.js --cov -j4 --branches=60 --functions=60 --lines=60 --statements=60",
-    "posttest": "standard -F dist/test/*.js dist/lib/*.js",
+    "test": "bin/build && tap dist/test/*.js --cov -j4 --branches=60 --functions=60 --lines=60 --statements=60",
+    "posttest": "standard test/*.js",
     "preversion": "npm test",
     "postversion": "npm publish",
     "postpublish": "git push origin --all; git push origin --tags"

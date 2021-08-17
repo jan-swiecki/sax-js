@@ -1,11 +1,11 @@
 // should be the same both ways.
-var xmls = [
+const xmls = [
   '<parent xmlns:a="http://ATTRIBUTE" a:attr="value" />',
   '<parent a:attr="value" xmlns:a="http://ATTRIBUTE" />'
 ]
 
-var ex1 = [
-  [ 'opentagstart', { name: 'parent', attributes: {}, ns: {} } ],
+const ex1 = [
+  ['opentagstart', { name: 'parent', attributes: {}, ns: {} }],
   [
     'opennamespace',
     {
@@ -76,8 +76,8 @@ var ex1 = [
 ]
 
 // swap the order of elements 2 and 3
-var ex2 = [ex1[0], ex1[1], ex1[3], ex1[2]].concat(ex1.slice(4))
-var expected = [ex1, ex2]
+const ex2 = [ex1[0], ex1[1], ex1[3], ex1[2]].concat(ex1.slice(4))
+const expected = [ex1, ex2]
 
 xmls.forEach(function (x, i) {
   require(__dirname).test({
