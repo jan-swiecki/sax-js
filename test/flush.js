@@ -1,6 +1,4 @@
-const parser =
-
-require(__dirname).test({
+const parser = require(__dirname).test({
   expect: [
     ['opentagstart', { name: 'T', attributes: {} }],
     ['opentag', { name: 'T', attributes: {}, isSelfClosing: false }],

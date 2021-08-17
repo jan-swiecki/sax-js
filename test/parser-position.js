@@ -17,15 +17,15 @@ function testPosition (chunks, expectedEvents) {
 }
 
 testPosition(['<div>abcdefgh</div>'], [
-  ['onopentagstart', { position: 5, startTagPosition: 1 }],
-  ['onopentag', { position: 5, startTagPosition: 1 }],
-  ['ontext', { position: 19, startTagPosition: 14 }],
-  ['onclosetag', { position: 19, startTagPosition: 14 }]
+  ['opentagstart', { position: 5, startTagPosition: 1 }],
+  ['opentag', { position: 5, startTagPosition: 1 }],
+  ['text', { position: 19, startTagPosition: 14 }],
+  ['closetag', { position: 19, startTagPosition: 14 }]
 ])
 
 testPosition(['<div>abcde', 'fgh</div>'], [
-  ['onopentagstart', { position: 5, startTagPosition: 1 }],
-  ['onopentag', { position: 5, startTagPosition: 1 }],
-  ['ontext', { position: 19, startTagPosition: 14 }],
-  ['onclosetag', { position: 19, startTagPosition: 14 }]
+  ['opentagstart', { position: 5, startTagPosition: 1 }],
+  ['opentag', { position: 5, startTagPosition: 1 }],
+  ['text', { position: 19, startTagPosition: 14 }],
+  ['closetag', { position: 19, startTagPosition: 14 }]
 ])

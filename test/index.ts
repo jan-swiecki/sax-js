@@ -17,7 +17,7 @@ export function test (options) {
           actual: [ev, n]
         })
       }
-      if (e >= expect.length && (ev === 'onend' || ev === 'onready')) {
+      if (e >= expect.length && (ev === 'end' || ev === 'ready')) {
         return
       }
       t.ok(e < expect.length, 'no unexpected events')
@@ -32,13 +32,13 @@ export function test (options) {
       }
 
       t.equal(ev.replace(/^on/, ''), expect[e][0])
-      if (ev === 'onerror') {
+      if (ev === 'error') {
         t.equal(n.message, expect[e][1])
       } else {
         t.same(n, expect[e][1])
       }
       e++
-      if (ev === 'onerror') {
+      if (ev === 'error') {
         parser.resume()
       }
     })

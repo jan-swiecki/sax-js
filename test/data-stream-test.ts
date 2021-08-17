@@ -9,11 +9,11 @@ saxStream.emitAllNodeTypes()
 
 tap.plan(2)
 saxStream.on('data', (data: SAXDataEvent) => {
-  if(data.nodeType === 'ontext') {
+  if(data.nodeType === 'text') {
     tap.equal(data.data, 'text')
   }
 })
-saxStream.on('ontext', data => {
+saxStream.on('text', data => {
   tap.equal(data, 'text')
 })
 

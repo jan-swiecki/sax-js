@@ -22,11 +22,11 @@ export class SAXStream extends Transform {
     })
     this._parser = new SAXParser(strict, opt)
 
-    this._parser.on('onend', () => {
+    this._parser.on('end', () => {
       this.emit('end')
     })
 
-    this._parser.on('onerror', er => {
+    this._parser.on('error', er => {
       this.emit('error', er)
 
       // if didn't throw, then means error was handled.

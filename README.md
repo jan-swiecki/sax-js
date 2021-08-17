@@ -52,10 +52,10 @@ parser.onerror = function (e) {
 parser.ontext = function (t) {
   // got some text.  t is the string of text.
 };
-parser.onopentag = function (node) {
+parser.opentag = function (node) {
   // opened a tag.  node has "name" and "attributes"
 };
-parser.onattribute = function (attr) {
+parser.attribute = function (attr) {
   // an attribute.  attr has "name" and "value"
 };
 parser.onend = function () {
