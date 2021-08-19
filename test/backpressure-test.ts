@@ -10,7 +10,7 @@ import { bytesEmojiFormatter } from '../lib/SpeedFormatters';
 import { Transform, TransformCallback } from 'stream';
 import { Depth, randomXmlStream } from '../lib/randomXmlStream';
 
-randomXmlStream(process.stdout, {
+randomXmlStream({
   depthGenerator: function(n: number): Depth {
     const x = n+1
     const y = 6-Math.log(x)
@@ -28,7 +28,7 @@ randomXmlStream(process.stdout, {
       maxChildren: y
     }
   }
-})
+}).pipe(process.stdout)
 
 // const devzero    = fs.createReadStream('/dev/zero')
 // const devnull    = fs.createWriteStream('/dev/null')

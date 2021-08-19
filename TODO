@@ -5,3 +5,5 @@
 * Build browser version
 * Run tests for multiple browser/node environments
 * Rewrite tests in typescript
+* Update README
+* Update examples

@@ -64,6 +64,25 @@ export const NodeTypes: NodeType[] = ['opencdata',
  'attribute',
  'text']
 
+export enum ENodeTypes {
+  'opencdata' = 'opencdata',
+  'sgmldeclaration' = 'sgmldeclaration',
+  'doctype' = 'doctype',
+  'comment' = 'comment',
+  'closecdata' = 'closecdata',
+  'processinginstruction' = 'processinginstruction',
+  'opennamespace' = 'opennamespace',
+  'opentag' = 'opentag',
+  'extractedrawtag' = 'extractedrawtag',
+  'closetag' = 'closetag',
+  'closenamespace' = 'closenamespace',
+  'cdata' = 'cdata',
+  'script' = 'script',
+  'opentagstart' = 'opentagstart',
+  'attribute' = 'attribute',
+  'text' = 'text',
+}
+
 export const EventTypes: EventType[] = (NodeTypes as EventType[]).concat(['ready', 'end', 'error'])
 
 // this really needs to be replaced with character classes.
@@ -1191,7 +1210,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
       // console.log(' -- start tracking')
       // process.stdout.write(chalk.yellow.bold(`<${tag.name}>`))
     }
-    this.emitNode('opentagstart', tag)
+    this.emitNode('opentagstart', _.omit(tag, 'attributes'))
   }
  
   private _error(errorMessage: string) {

@@ -2,13 +2,39 @@ import { Duplex, Transform } from "stream"
 import { StringDecoder } from "string_decoder";
 
 
-import { NodeTypes, SAXParser, NodeType } from './SAXParser.js';
+import { NodeTypes, SAXParser, NodeType, ENodeTypes } from './SAXParser.js';
 
 
-export type SAXDataEvent = {
-  nodeType: NodeType,
-  data?: any
+export type SAXAttribute    = {name: string, value: string}
+export type SAXOpenTagStart = {name: string}
+export type SAXCloseTag     = {name: string}
+export type SAXOpenCData    = {}
+export type SAXCloseCData   = {}
+
+export type SAXTag = {
+  name: string,
+  attributes: {[key: string]: string},
+  isSelfClosing: boolean
 }
+
+export type SAXText  = string
+export type SAXCData = string
+
+// export type SAXData = SAXAttribute
+
+// export type SAXDataEvent = {
+//   nodeType: NodeType,
+//   data?: SAXData
+// }
+export type SAXDataEvent =
+    {nodeType: ENodeTypes.attribute,    data: SAXAttribute}
+  | {nodeType: ENodeTypes.opentagstart, data: SAXOpenTagStart}
+  | {nodeType: ENodeTypes.opentag,      data: SAXTag}
+  | {nodeType: ENodeTypes.closetag,     data: SAXCloseTag}
+  | {nodeType: ENodeTypes.text,         data: SAXText}
+  | {nodeType: ENodeTypes.cdata,        data: SAXCData}
+  | {nodeType: ENodeTypes.opencdata,    data: SAXOpenCData}
+  | {nodeType: ENodeTypes.closecdata,   data: SAXCloseCData}
 
 
 export class SAXStream extends Transform {

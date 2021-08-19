@@ -1,5 +1,5 @@
 import _ = require("lodash");
-import { Writable } from "stream";
+import { Readable, Writable } from "stream";
 
 
 const { random, round, ceil } = Math
@@ -105,14 +105,16 @@ function * randomAttributesString(maxAttributes, maxAttributeKeySize, maxAttribu
 }
 
 
-export function randomXmlStream(stream: Writable = process.stdout, options: Options) {
+export function randomXmlStream(options: Options): Readable {
   const depthGenerator = gen(options.depthGenerator)
   const depthResults: IteratorResult<Depth>[] = []
 
-  
-  for(const chunk of randomXml()) {
-    stream.write(chunk)
-  }
+
+  return Readable.from(function *() {
+    for(const chunk of randomXml()) {
+      yield chunk
+    }
+  }())
 
 
   function * randomXml(depth = 0): IterableIterator<string> {

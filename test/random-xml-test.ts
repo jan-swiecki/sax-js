@@ -1,11 +1,22 @@
+import through2 = require('through2')
+import tap = require('tap')
+
 import { Depth, randomXmlStream } from '../lib/randomXmlStream';
-import { SAXStream } from '../lib/SAXStream';
+import { SAXDataEvent, SAXStream } from '../lib/SAXStream';
+import { ENodeTypes } from '../lib/SAXParser';
+import _ = require('lodash');
 
 
 const saxStream = new SAXStream()
 saxStream.emitAllNodeTypes()
 
-randomXmlStream(saxStream, {
+let inputXml = ''
+let outputXml = ''
+
+
+tap.plan(1)
+
+randomXmlStream({
   depthGenerator: function(n: number): Depth {
     const x = n+1
     const y = 2-Math.log(x)
@@ -24,10 +35,39 @@ randomXmlStream(saxStream, {
     }
   }
 })
+  .pipe(through2(function(chunk, encoding, callback) {
+    inputXml = inputXml + chunk
+    this.push(chunk)
+    callback()
+  }))
+  .pipe(saxStream)
+  .pipe(through2.obj(function(node: SAXDataEvent, encoding, callback) {
+    switch(node.nodeType) {
+      // case ENodeTypes.attribute:    outputXml += ` ${node.data.name}="${node.data.value}"`; break;
+      case ENodeTypes.opentag:      outputXml += `<${node.data.name}${_.map(node.data.attributes, (v, k) => ` ${k}="${v}"`).join('')}${node.data.isSelfClosing ? '/' : ''}>`; break;
+      case ENodeTypes.closetag:     outputXml += `</${node.data.name}>`; break;
+      case ENodeTypes.text:         outputXml += node.data; break
+      case ENodeTypes.cdata:        outputXml += node.data; break
+    }
+    callback()
+  }))
+  .on('finish', () => {
+    tap.equal(outputXml, inputXml)
+  })
 
-saxStream.onXmlEvent((nodeType, data) => {
-  console.log(nodeType)
-})
+
+type AttributeEvent = {
+  name: string,
+  value: string
+}
+
+// saxStream.onXmlEvent((nodeType, data) => {
+//   switch(nodeType) {
+//     case 'attribute':
+//       const attr: AttributeEvent = data
+      
+//   }
+// })
 
 // const devzero    = fs.createReadStream('/dev/zero')
 // const devnull    = fs.createWriteStream('/dev/null')
