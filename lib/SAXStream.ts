@@ -54,22 +54,13 @@ export class SAXStream extends Transform {
     this.emitNodeTypes(...NodeTypes)
   }
 
-  // on(event: string | symbol | NodeType, listener: (...args: any[]) => void) {
-  //   if(NodeTypes.includes(event as NodeType)) {
-  //     const nodeType = event as NodeType
-  //     this.emitNodeTypes(nodeType)
-  //     this.on('data', (data) => {
-  //       this.buffer.push({
-  //         nodeType: event,
-  //         data: data
-  //       })
-  //     })
-  //   } else {
-  //     super.on(event, listener)
-  //   }
+  onXml(event: NodeType, listener: (...args: any[]) => void): SAXStream {
+    return this.on(event, listener)
+  }
 
-  //   return this;
-  // }
+  onXmlEvent(listener: (nodeType: NodeType, data: any) => void): SAXStream {
+    return this.on('data', ({nodeType, data}) => listener(nodeType, data))
+  }
 
   private alsoEmit(event: SAXDataEvent): SAXDataEvent {
     this.emit(event.nodeType, event.data)

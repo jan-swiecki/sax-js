@@ -1,19 +1,14 @@
-import fs = require('fs');
-
-
-import tap = require('tap');
-import through2 = require('through2');
-
-
-import { getSpeedMeter } from '../lib/speed';
-import { bytesEmojiFormatter } from '../lib/SpeedFormatters';
-import { Transform, TransformCallback } from 'stream';
 import { Depth, randomXmlStream } from '../lib/randomXmlStream';
+import { SAXStream } from '../lib/SAXStream';
 
-randomXmlStream(process.stdout, {
+
+const saxStream = new SAXStream()
+saxStream.emitAllNodeTypes()
+
+randomXmlStream(saxStream, {
   depthGenerator: function(n: number): Depth {
     const x = n+1
-    const y = 6-Math.log(x)
+    const y = 2-Math.log(x)
 
     if(y < 1) {
       return;
@@ -28,6 +23,10 @@ randomXmlStream(process.stdout, {
       maxChildren: y
     }
   }
+})
+
+saxStream.onXmlEvent((nodeType, data) => {
+  console.log(nodeType)
 })
 
 // const devzero    = fs.createReadStream('/dev/zero')

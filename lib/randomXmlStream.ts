@@ -1,4 +1,5 @@
 import _ = require("lodash");
+import { Writable } from "stream";
 
 
 const { random, round, ceil } = Math
@@ -18,44 +19,61 @@ function randomString(len: number = 10) {
 }
 
 
-type Options = {
-  maxAttributes: number[],
-  maxAttributeKeySize: number[],
-  maxAttributeValueSize: number[],
-  maxTextSize: number[],
-  maxCDataSize: number[],
-  maxChildren: number[]
+export type Depth = {
+  maxAttributes: number,
+  maxAttributeKeySize: number,
+  maxAttributeValueSize: number,
+  maxTextSize: number,
+  maxCDataSize: number,
+  maxChildren: number,
 }
 
 
-function * openTag(t: string, randomAttrs = false, options: Options = null, indent = '', depth = 0): IterableIterator<string> {
-  yield `${indent}<${t}`;
+type Options = {
+  depthGenerator: (n: number) => Depth
+}
 
-  if(randomAttrs) {
-    let a: IteratorResult<string, string>
-    
-    let attrs = randomAttributesString(
-      options.maxAttributes[depth] || 0,
-      options.maxAttributeKeySize[depth] || 0,
-      options.maxAttributeValueSize[depth] || 0
-    )
-    while(a = attrs.next()) {
-      if(a.done) {
+
+function gen(f: (n: number) => Depth) {
+  return (function *g() {
+    let n = 0;
+    while(true) {
+      const d = f(n++)
+      if(! d) {
         break
       }
-      yield ' '
-      yield a.value
+      yield d;
     }
+  }())
+}
+
+
+function * openTag(t: string, d: Depth = null, indent = ''): IterableIterator<string> {
+  yield `${indent}<${t}`;
+
+  let a: IteratorResult<string, string>
+    
+  let attrs = randomAttributesString(
+    d.maxAttributes || 0,
+    d.maxAttributeKeySize || 0,
+    d.maxAttributeValueSize || 0
+  )
+  while(a = attrs.next()) {
+    if(a.done) {
+      break
+    }
+    yield ' '
+    yield a.value
   }
 
   yield '>\n'
 
-  const text = randomString(ceil(options.maxTextSize[depth]*random()))
+  const text = randomString(ceil(d.maxTextSize*random()))
   for(let x = 0; x < text.length; x += 120) {
     yield `${indent}  ${text.substring(x, x+120)}\n`;
   }
 
-  const cdata = randomString(ceil(options.maxCDataSize[depth]*random()))
+  const cdata = randomString(ceil(d.maxCDataSize*random()))
   if(cdata.length > 0) {
     yield `${indent}  <![CDATA[`
     for(let x = 0; x < cdata.length; x += 120) {
@@ -69,11 +87,12 @@ function * openTag(t: string, randomAttrs = false, options: Options = null, inde
     }
     yield `]]>\n`
   }
-
 }
 
 
-const closeTag = (t: string) => `</${t}>\n`
+function *closeTag(t: string){
+  yield `</${t}>\n`
+}
 
 
 function * randomAttributesString(maxAttributes, maxAttributeKeySize, maxAttributeValueSize): IterableIterator<string> {
@@ -86,27 +105,35 @@ function * randomAttributesString(maxAttributes, maxAttributeKeySize, maxAttribu
 }
 
 
-export function randomXmlStream(stream = process.stdout, options: Options) {
+export function randomXmlStream(stream: Writable = process.stdout, options: Options) {
+  const depthGenerator = gen(options.depthGenerator)
+  const depthResults: IteratorResult<Depth>[] = []
+
+  
   for(const chunk of randomXml()) {
     stream.write(chunk)
   }
 
+
   function * randomXml(depth = 0): IterableIterator<string> {
-    const indent = '  '.repeat(depth)
-    let maxChildren = options.maxChildren[depth] || 0
-    if(depth === 0) {
-      const root = randomString();
-      // stream.write(`<${root}>\n`);
-      yield * openTag(root, true, options, indent, depth)
-      yield * randomXml(depth+1)
-      yield closeTag(root)
-    } else if(maxChildren > 0) {
+    const indent        = '  '.repeat(depth)
+    const depthRes      = depthResults[depth] || depthGenerator.next()
+    depthResults[depth] = depthRes
+    
+    if(depthRes.done) {
+      return
+    }
+    
+    const d: Depth = depthRes.value
+    let maxChildren = ceil(d.maxChildren * random())
+
+    if(maxChildren >= 1) {
       while(maxChildren--) {
         const tag = randomString()
-        yield * openTag(tag, true, options, indent, depth)
+        yield * openTag(tag, d, indent)
         yield * randomXml(depth+1)
         yield indent
-        yield closeTag(tag)
+        yield * closeTag(tag)
       }
     }
   }
