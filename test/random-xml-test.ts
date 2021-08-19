@@ -7,7 +7,7 @@ import { ENodeTypes } from '../lib/SAXParser';
 import _ = require('lodash');
 
 
-const saxStream = new SAXStream()
+const saxStream = new SAXStream(true)
 saxStream.emitAllNodeTypes()
 
 let inputXml = ''
