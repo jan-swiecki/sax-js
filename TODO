@@ -1,4 +1,6 @@
 * Add cross platform building
+* Add cross platform tests
+* Cross platform compatibility
 * Add ts-standard
 * Build browser version
 * Run tests for multiple browser/node environments
