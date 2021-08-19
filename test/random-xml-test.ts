@@ -19,7 +19,7 @@ tap.plan(1)
 randomXmlStream({
   depthGenerator: function(n: number): Depth {
     const x = n+1
-    const y = 2-Math.log(x)
+    const y = n === 1 ? 1 : 2-Math.log(x)
 
     if(y < 1) {
       return;
@@ -33,9 +33,11 @@ randomXmlStream({
       maxCDataSize: 1,
       maxChildren: y
     }
-  }
+  },
+  trailingEndLine: false
 })
   .pipe(through2(function(chunk, encoding, callback) {
+    process.stdout.write(chunk)
     inputXml = inputXml + chunk
     this.push(chunk)
     callback()
@@ -43,31 +45,20 @@ randomXmlStream({
   .pipe(saxStream)
   .pipe(through2.obj(function(node: SAXDataEvent, encoding, callback) {
     switch(node.nodeType) {
-      // case ENodeTypes.attribute:    outputXml += ` ${node.data.name}="${node.data.value}"`; break;
       case ENodeTypes.opentag:      outputXml += `<${node.data.name}${_.map(node.data.attributes, (v, k) => ` ${k}="${v}"`).join('')}${node.data.isSelfClosing ? '/' : ''}>`; break;
-      case ENodeTypes.closetag:     outputXml += `</${node.data.name}>`; break;
+      case ENodeTypes.closetag:     outputXml += `</${node.data}>`; break;
       case ENodeTypes.text:         outputXml += node.data; break
-      case ENodeTypes.cdata:        outputXml += node.data; break
+      case ENodeTypes.cdata:        outputXml += `<![CDATA[${node.data}]]>`; break
     }
     callback()
   }))
   .on('finish', () => {
-    tap.equal(outputXml, inputXml)
+    console.log(inputXml)
+    console.log('-------------')
+    console.log(outputXml)
+    // tap.equal(outputXml, inputXml)
   })
 
-
-type AttributeEvent = {
-  name: string,
-  value: string
-}
-
-// saxStream.onXmlEvent((nodeType, data) => {
-//   switch(nodeType) {
-//     case 'attribute':
-//       const attr: AttributeEvent = data
-      
-//   }
-// })
 
 // const devzero    = fs.createReadStream('/dev/zero')
 // const devnull    = fs.createWriteStream('/dev/null')

@@ -24,7 +24,7 @@
 // Modified by Jan Święcki (c) 2021
 // Licensed under MIT
 
-import _ from 'lodash'
+import _ = require('lodash')
 
 const splitOnTags = str => str.split(/(<\/?[^>]+>)/g).filter(line => line.trim() !== '');
 const isTag = str => /<[^>!]+>/.test(str);
@@ -33,7 +33,7 @@ const isClosingTag = str => /<\/+[^>]+>/.test(str);
 const isSelfClosingTag = str => /<[^>]+\/>/.test(str);
 const isOpeningTag = str => isTag(str) && !isClosingTag(str) && !isSelfClosingTag(str) && !isXMLDeclaration(str);
 
-export default (xml, spaces) => {
+export default (xml: string, spaces: number = 2) => {
   let depth = 0;
   const indent = spaces ? _.repeat(' ', spaces) : '  '
 

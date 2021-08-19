@@ -5,9 +5,10 @@ import { StringDecoder } from "string_decoder";
 import { NodeTypes, SAXParser, NodeType, ENodeTypes } from './SAXParser.js';
 
 
+export type SAXTagName      = string
 export type SAXAttribute    = {name: string, value: string}
-export type SAXOpenTagStart = {name: string}
-export type SAXCloseTag     = {name: string}
+export type SAXOpenTagStart = {name: SAXTagName}
+export type SAXCloseTag     = SAXTagName
 export type SAXOpenCData    = {}
 export type SAXCloseCData   = {}
 

@@ -6,16 +6,29 @@ const { random, round, ceil } = Math
 
 
 // https://stackoverflow.com/a/1349426/1637178
-const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+const alnum = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+const alphabetic = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
 
-function randomString(len: number = 10) {
-  let result           = '';
-  let charactersLength = characters.length;
-  for(let i = 0; i < len; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+function randomString(len: number = 10, chars = alnum, garbageProbability = 0, dontRepeatValues: Set<string> = null, retries = 3) {
+  if(retries === 0) {
+    throw new Error(`randomString: maximum retires reached, dontRepeatValue are getting repeated: ${[...dontRepeatValues.values()].join(', ')} (len=${len}, chars=${chars}, garbageProbability=${garbageProbability})`)
   }
-  return result;
+
+  let result           = '';
+  let charactersLength = chars.length;
+  for(let i = 0; i < len; i++) {
+    const c = Math.random() < garbageProbability ?
+      String.fromCharCode(Math.floor(256*Math.random()))
+      : chars.charAt(Math.floor(Math.random() * charactersLength));
+    result += c
+  }
+
+  if(dontRepeatValues && dontRepeatValues.has(result)) {
+    return randomString(len, chars, garbageProbability, dontRepeatValues, retries-1)
+  } else {
+    return result;
+  }
 }
 
 
@@ -30,7 +43,9 @@ export type Depth = {
 
 
 type Options = {
-  depthGenerator: (n: number) => Depth
+  depthGenerator: (n: number) => Depth,
+  trailingEndLine?: boolean,
+  garbageProbability?: number
 }
 
 
@@ -58,12 +73,15 @@ function * openTag(t: string, d: Depth = null, indent = ''): IterableIterator<st
     d.maxAttributeKeySize || 0,
     d.maxAttributeValueSize || 0
   )
+
   while(a = attrs.next()) {
     if(a.done) {
       break
     }
     yield ' '
     yield a.value
+    // const [key, value] = a.value
+    // yield `${key}="${value}"`
   }
 
   yield '>\n'
@@ -91,15 +109,20 @@ function * openTag(t: string, d: Depth = null, indent = ''): IterableIterator<st
 
 
 function *closeTag(t: string){
-  yield `</${t}>\n`
+  yield `</${t}>`
 }
 
 
 function * randomAttributesString(maxAttributes, maxAttributeKeySize, maxAttributeValueSize): IterableIterator<string> {
+  let dontRepeatValues = new Set<string>()
   let max = ceil(maxAttributes*random())
   while(max--) {
-    const key = randomString(ceil(maxAttributeKeySize*random()))
+    // dont repeat attribute names
+    const key = randomString(ceil(maxAttributeKeySize*random()), alphabetic, 0, dontRepeatValues)
+    dontRepeatValues.add(key)
+
     const value = randomString(ceil(maxAttributeValueSize*random()))
+
     yield `${key}="${value}"`
   }
 }
@@ -108,6 +131,9 @@ function * randomAttributesString(maxAttributes, maxAttributeKeySize, maxAttribu
 export function randomXmlStream(options: Options): Readable {
   const depthGenerator = gen(options.depthGenerator)
   const depthResults: IteratorResult<Depth>[] = []
+
+  const trailingEndLine = _.isUndefined(options.trailingEndLine) ? true : options.trailingEndLine
+  const garbageProbability = _.isUndefined(options.garbageProbability) ? 0 : options.garbageProbability
 
 
   return Readable.from(function *() {
@@ -127,15 +153,20 @@ export function randomXmlStream(options: Options): Readable {
     }
     
     const d: Depth = depthRes.value
-    let maxChildren = ceil(d.maxChildren * random())
+
+    // XML can have only one root
+    let maxChildren = depth === 0 ? 1 : ceil(d.maxChildren * random())
 
     if(maxChildren >= 1) {
       while(maxChildren--) {
-        const tag = randomString()
+        const tag = randomString(10, alphabetic, garbageProbability)
         yield * openTag(tag, d, indent)
         yield * randomXml(depth+1)
         yield indent
         yield * closeTag(tag)
+        if(trailingEndLine) {
+          yield '\n'
+        }
       }
     }
   }

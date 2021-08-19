@@ -7,3 +7,6 @@
 * Rewrite tests in typescript
 * Update README
 * Update examples
+* Add namespaces and other special xml elements to random xml test
+* Inject more random errors to random tests like attributes being repeated etc.
+* Add fuzzy tests for error checking and security checking
