@@ -8,6 +8,7 @@ import _ from "lodash"
 
 import SAXEntities from "./SAXEntities.js"
 import xmlBeautifier from './xml-beautifier.js';
+import { SAXDataEvent } from './SAXStream';
 
 
 type Attribute = {
@@ -327,6 +328,8 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
   sgmlDecl: string;
   textNode: string;
 
+  saxDataEvents: SAXDataEvent[]
+
   constructor(strict: boolean, opt) {
     super()
     this.strict = strict
@@ -360,6 +363,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
     this.strictEntities = this.opt.strictEntities
     this.ENTITIES = this.strictEntities ? Object.create(sax.XML_ENTITIES) : Object.create(sax.ENTITIES)
     this.attribList = []
+    this.saxDataEvents = []
 
     this.opt.extractRawTagContent = this.opt.extractRawTagContent || null
     this.opt.extractRawTagContentEnabled = !!this.opt.extractRawTagContent
@@ -394,7 +398,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
     this.closeText()
     this.c = ''
     this.closed = true
-    this.emit('end')
+    // this.emit('end')
     this.reset()
     return this
   }
@@ -415,31 +419,37 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
   private flushBuffers () {
     this.closeText()
     if (this.cdata !== '') {
-      this.emitNode('cdata', this.cdata)
+      this.emitNode(ENodeTypes.cdata, this.cdata)
       this.cdata = ''
     }
     if (this.script !== '') {
-      this.emitNode('script', this.script)
+      this.emitNode(ENodeTypes.script, this.script)
       this.script = ''
     }
   }
 
-  private emitNode (nodeType: NodeType, data?) {
+  private emitNode (nodeType: ENodeTypes, data?) {
     if (this.textNode) {
       this.closeText()
     }
-    this.emit(nodeType, data)
+    this.saxDataEvents.push({nodeType: nodeType, data})
+    // this.emit(nodeType, data)
   }
   
+  // TODO
+  // Not sure why textNode would be not empty during end.
+  // Text event that is being emitted here would be emitted after root tag is closed.
   private closeText() {
     this.textNode = textopts(this.opt, this.textNode)
     if (this.textNode) {
-      this.emit('text', this.textNode)
+      this.saxDataEvents.push({nodeType: ENodeTypes.text, data: this.textNode})
     }
     this.textNode = ''
   }
  
   write (chunk: string | Buffer) {
+    this.saxDataEvents = []
+
     if (this.error) {
       throw this.error
     }
@@ -577,7 +587,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
 
         case S.SGML_DECL:
           if ((this.sgmlDecl + c).toUpperCase() === CDATA) {
-            this.emitNode('opencdata')
+            this.emitNode(ENodeTypes.opencdata)
             this.state = S.CDATA
             this.sgmlDecl = ''
             this.cdata = ''
@@ -593,7 +603,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
             this.doctype = ''
             this.sgmlDecl = ''
           } else if (c === '>') {
-            this.emitNode('sgmldeclaration', this.sgmlDecl)
+            this.emitNode(ENodeTypes.sgmldeclaration, this.sgmlDecl)
             this.sgmlDecl = ''
             this.state = S.TEXT
           } else if (isQuote(c)) {
@@ -615,7 +625,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
         case S.DOCTYPE:
           if (c === '>') {
             this.state = S.TEXT
-            this.emitNode('doctype', this.doctype)
+            this.emitNode(ENodeTypes.doctype, this.doctype)
             this.doctype = '<saxparser_true>' // just remember that we saw it.
           } else {
             this.doctype += c
@@ -667,7 +677,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
             this.state = S.COMMENT_ENDED
             this.comment = textopts(this.opt, this.comment)
             if (this.comment) {
-              this.emitNode('comment', this.comment)
+              this.emitNode(ENodeTypes.comment, this.comment)
             }
             this.comment = ''
           } else {
@@ -708,9 +718,9 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
         case S.CDATA_ENDING_2:
           if (c === '>') {
             if (this.cdata) {
-              this.emitNode('cdata', this.cdata)
+              this.emitNode(ENodeTypes.cdata, this.cdata)
             }
-            this.emitNode('closecdata')
+            this.emitNode(ENodeTypes.closecdata)
             this.cdata = ''
             this.state = S.TEXT
           } else if (c === ']') {
@@ -743,7 +753,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
 
         case S.PROC_INST_ENDING:
           if (c === '>') {
-            this.emitNode('processinginstruction', {
+            this.emitNode(ENodeTypes.processinginstruction, {
               name: this.procInstName,
               body: this.procInstBody
             })
@@ -826,7 +836,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
             this.strictFail('Attribute without value')
             this.tag.attributes[this.attribName] = ''
             this.attribValue = ''
-            this.emitNode('attribute', {
+            this.emitNode(ENodeTypes.attribute, {
               name: this.attribName,
               value: ''
             })
@@ -1013,7 +1023,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
       let parent = this.tags[this.tags.length - 1] || this
       if (tag.ns && parent.ns !== tag.ns) {
         Object.keys(tag.ns).forEach(p => {
-          this.emitNode('opennamespace', {
+          this.emitNode(ENodeTypes.opennamespace, {
             prefix: p,
             uri: tag.ns[p]
           })
@@ -1047,7 +1057,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
           a.uri = prefix
         }
         this.tag.attributes[name] = a
-        this.emitNode('attribute', a)
+        this.emitNode(ENodeTypes.attribute, a)
       }
       this.attribList.length = 0
     }
@@ -1057,7 +1067,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
     // process the tag
     this.sawRoot = true
     this.tags.push(this.tag)
-    this.emitNode('opentag', this.tag)
+    this.emitNode(ENodeTypes.opentag, this.tag)
     // process.stdout.write(chalk.blue.bold(`<${parser.tag.name}>`))
     if (!selfClosing) {
       // special case for <script> in non-strict mode.
@@ -1088,7 +1098,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
         this.state = S.SCRIPT
         return
       }
-      this.emitNode('script', this.script)
+      this.emitNode(ENodeTypes.script, this.script)
       this.script = ''
     }
   
@@ -1126,13 +1136,13 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
       if(this.opt.extractRawTagContentEnabled && this.path.join('/') === this.opt.extractRawTagContent) {
         // console.log(' -- stop tracking')
         // console.log(parser.rawTagExtract);
-        this.emitNode('extractedrawtag', fix_indent(this.rawTagExtract))
+        this.emitNode(ENodeTypes.extractedrawtag, fix_indent(this.rawTagExtract))
         this.rawTagExtract = ''
         this.rawTagTracking = false
         // process.stdout.write(chalk.red.bold(`<${parser.tagName}>`))
       }
       this.path.pop()
-      this.emitNode('closetag', this.tagName)
+      this.emitNode(ENodeTypes.closetag, this.tagName)
   
       let x = {}
       for (let i in tag.ns) {
@@ -1144,7 +1154,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
         // remove namespace bindings introduced by tag
         Object.keys(tag.ns).forEach(p => {
           let n = tag.ns[p]
-          this.emitNode('closenamespace', { prefix: p, uri: n })
+          this.emitNode(ENodeTypes.closenamespace, { prefix: p, uri: n })
         })
       }
     }
@@ -1170,12 +1180,12 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
             break
 
           case 'cdata':
-            this.emitNode('cdata', this.cdata)
+            this.emitNode(ENodeTypes.cdata, this.cdata)
             this.cdata = ''
             break
 
           case 'script':
-            this.emitNode('script', this.script)
+            this.emitNode(ENodeTypes.script, this.script)
             this.script = ''
             break
 
@@ -1210,7 +1220,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
       // console.log(' -- start tracking')
       // process.stdout.write(chalk.yellow.bold(`<${tag.name}>`))
     }
-    this.emitNode('opentagstart', _.omit(tag, 'attributes'))
+    this.emitNode(ENodeTypes.opentagstart, _.omit(tag, 'attributes'))
   }
  
   private _error(errorMessage: string) {
@@ -1275,7 +1285,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
     } else {
       // in non-xmlns mode, we can emit the event right away
       this.tag.attributes[this.attribName] = this.attribValue
-      this.emitNode('attribute', {
+      this.emitNode(ENodeTypes.attribute, {
         name: this.attribName,
         value: this.attribValue
       })

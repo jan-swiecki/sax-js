@@ -166,6 +166,9 @@ function randomXmlStream(options) {
         }
       }
     }
+    if (depth === 0 && d.trailingRandomText > 0) {
+      yield randomString(ceil(d.trailingRandomText * random()));
+    }
   }
   __name(randomXml, "randomXml");
 }

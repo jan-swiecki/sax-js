@@ -18,9 +18,7 @@ var __toModule = (module2) => {
   return __reExport(__markAsModule(__defProp(module2 != null ? __create(__getProtoOf(module2)) : {}, "default", module2 && module2.__esModule && "default" in module2 ? { get: () => module2.default, enumerable: true } : { value: module2, enumerable: true })), module2);
 };
 var import_SpeedFormatters = __toModule(require("../lib/SpeedFormatters"));
-var import_randomXmlStream = __toModule(require("../lib/randomXmlStream"));
-var import_SAXStream = __toModule(require("../lib/SAXStream"));
-var import_SAXParser = __toModule(require("../lib/SAXParser"));
+var import_stream = __toModule(require("stream"));
 const fs = require("fs");
 const _ = require("lodash");
 const tap = require("tap");
@@ -29,11 +27,7 @@ const kb = 1024;
 const mb = 1024 * 1024;
 const gb = 1024 * 1024 * 1024;
 const test_cases = [
-  [2, 16 * kb, 512],
-  [2, 35 * kb, 512],
-  [2, 64 * kb, 512],
-  [2, 128 * kb, 512],
-  [2, 128 * kb, 16 * kb]
+  [2, 16 * kb, 512]
 ];
 async function run() {
   tap.plan(test_cases.length);
@@ -45,34 +39,14 @@ __name(run, "run");
 run();
 function check(N, maxSize, highWaterMark) {
   return new Promise((resolve, reject) => {
-    const saxStream = new import_SAXStream.SAXStream(true);
-    saxStream.emitAllNodeTypes();
     let inputXml = "";
     let intermediateXml = "";
     let outputXml = "";
     let size = 0;
+    const devzero = fs.createReadStream("/dev/zero", { highWaterMark });
     const devnull = fs.createWriteStream("/dev/null");
     let c1 = { total: 0 };
     let c2 = { total: 0 };
-    const infiniteXml = (0, import_randomXmlStream.randomXmlStream)({
-      depthGenerator: function(n) {
-        const x = n + 1;
-        const y = n === 1 ? 1 : N - Math.log(x);
-        if (y < 1) {
-          return;
-        }
-        return {
-          maxAttributes: y,
-          maxAttributeKeySize: y,
-          maxAttributeValueSize: y,
-          maxTextSize: y,
-          maxCDataSize: y,
-          maxChildren: x == 2 ? Infinity : null
-        };
-      },
-      trailingEndLine: false,
-      highWatermark: highWaterMark
-    });
     const check2 = /* @__PURE__ */ __name(() => {
       console.log("stop and check");
       const t1 = c1.total;
@@ -81,45 +55,57 @@ function check(N, maxSize, highWaterMark) {
       tap.ok(diffPercent < 0.05, `diffPercent < 0.05, t1=${t1} t2=${t2} diffPercent=${diffPercent.toFixed(3)}, N=${N}, xml stream size=${(0, import_SpeedFormatters.formatBytes)(maxSize)}, highWaterMark=${(0, import_SpeedFormatters.formatBytes)(highWaterMark)}`);
       resolve();
     }, "check");
+    const debug = /* @__PURE__ */ __name((name, stream) => {
+      return stream;
+    }, "debug");
+    let t = 0;
+    let wait = [];
     let stopped = false;
-    infiniteXml.pipe(through2(function(chunk, encoding, callback) {
+    debug("devzero", devzero).pipe(debug("pipe1", new import_stream.Transform({ transform(chunk, encoding, callback) {
+      process.stdout.write(".");
       inputXml += chunk;
+      if (stopped) {
+        callback();
+      }
       if (c1.total > maxSize && !stopped) {
         stopped = true;
-        infiniteXml.finish();
+        devzero.destroy();
+        this.push(null);
+        callback();
+        return;
       }
       c1.total += chunk.length;
       this.push(chunk);
       callback();
-    })).pipe(saxStream).pipe(through2.obj(function(node, encoding, callback) {
-      let x = "";
-      switch (node.nodeType) {
-        case import_SAXParser.ENodeTypes.opentag:
-          this.push(x = `<${node.data.name}${_.map(node.data.attributes, (v, k) => ` ${k}="${v}"`).join("")}${node.data.isSelfClosing ? "/" : ""}>`);
-          break;
-        case import_SAXParser.ENodeTypes.closetag:
-          this.push(x = `</${node.data}>`);
-          break;
-        case import_SAXParser.ENodeTypes.text:
-          this.push(x = node.data);
-          break;
-        case import_SAXParser.ENodeTypes.cdata:
-          this.push(x = `<![CDATA[${node.data}]]>`);
-          break;
+    } }))).pipe(new import_stream.Transform({
+      transform(chunk, encoding, callback) {
+        const x = t;
+        wait.push(1);
+        setTimeout(() => {
+          this.push(chunk);
+          wait[x] = 0;
+        }, 10 * t++);
+        callback();
+      },
+      async flush(callback) {
+        while (_.sum(wait) > 0) {
+          await new Promise((r) => setTimeout(r, 0));
+        }
+        console.log("flushed");
+        callback();
       }
-      intermediateXml += x;
-      callback();
-    })).pipe(through2(function(chunk, encoding, callback) {
+    })).pipe(debug("pipe2", through2(function(chunk, encoding, callback) {
+      process.stdout.write(",");
       outputXml += chunk;
       c2.total += chunk.length;
       this.push(chunk);
       callback();
-    })).on("finish", () => {
+    }))).on("end", () => {
       fs.writeFileSync("inputXml.xml", inputXml, "utf8");
       fs.writeFileSync("intermediateXml.xml", intermediateXml, "utf8");
       fs.writeFileSync("outputXml.xml", outputXml, "utf8");
       check2();
-    }).pipe(devnull);
+    }).pipe(debug("devnull", devnull));
   });
 }
 __name(check, "check");

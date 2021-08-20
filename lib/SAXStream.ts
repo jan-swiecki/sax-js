@@ -11,6 +11,7 @@ export type SAXOpenTagStart = {name: SAXTagName}
 export type SAXCloseTag     = SAXTagName
 export type SAXOpenCData    = {}
 export type SAXCloseCData   = {}
+export type SAXTodo         = {}
 
 export type SAXTag = {
   name: string,
@@ -36,6 +37,14 @@ export type SAXDataEvent =
   | {nodeType: ENodeTypes.cdata,        data: SAXCData}
   | {nodeType: ENodeTypes.opencdata,    data: SAXOpenCData}
   | {nodeType: ENodeTypes.closecdata,   data: SAXCloseCData}
+  | {nodeType: ENodeTypes.doctype,      data: SAXTodo}
+  | {nodeType: ENodeTypes.comment,      data: SAXTodo}
+  | {nodeType: ENodeTypes.processinginstruction,   data: SAXTodo}
+  | {nodeType: ENodeTypes.extractedrawtag,         data: SAXTodo}
+  | {nodeType: ENodeTypes.sgmldeclaration,         data: SAXTodo}
+  | {nodeType: ENodeTypes.opennamespace,           data: SAXTodo}
+  | {nodeType: ENodeTypes.closenamespace,          data: SAXTodo}
+  | {nodeType: ENodeTypes.script,                  data: SAXTodo}
 
 
 export class SAXStream extends Transform {
@@ -43,51 +52,57 @@ export class SAXStream extends Transform {
   private buffer: SAXDataEvent[] = []
   private _decoder = new StringDecoder('utf8')
 
-  constructor(strict: boolean = false, opt = {}) {
+
+  private ended = false
+
+  constructor(strict: boolean = false, opt: any = {}) {
     super({
-      readableObjectMode: true
+      readableObjectMode: true,
+      // highWaterMark: opt.highWaterMark || null,
+      writableHighWaterMark: opt.highWaterMark || null,
+      readableHighWaterMark: 16,
     })
     this._parser = new SAXParser(strict, opt)
 
     this._parser.on('end', () => {
-      this.emit('end')
+      // this.emit('end')
     })
 
-    this._parser.on('error', er => {
-      this.emit('error', er)
+    // this._parser.on('error', er => {
+    //   this.emit('error', er)
 
-      // if didn't throw, then means error was handled.
-      // go ahead and clear error, so we can write again.
-      this._parser.error = null
-    })
+    //   // if didn't throw, then means error was handled.
+    //   // go ahead and clear error, so we can write again.
+    //   this._parser.error = null
+    // })
   }
 
   emitNodeTypes(...nodeTypes: NodeType[]) {
-    for(const nodeType of nodeTypes) {
-      if(this._parser.listenerCount(nodeType) === 0) {
-        this._parser.on(nodeType, (data) => {
-          // console.log(data)
-          // this.push(this.buffer.length > 0 ? this.alsoEmit(this.buffer.shift()) : null)
-          this.push(this.alsoEmit({
-            nodeType: nodeType,
-            data: data
-          }))
-        })
-      }
-    }
+    // for(const nodeType of nodeTypes) {
+    //   if(this._parser.listenerCount(nodeType) === 0) {
+    //     this._parser.on(nodeType, (data) => {
+    //       // console.log(data)
+    //       // this.push(this.buffer.length > 0 ? this.alsoEmit(this.buffer.shift()) : null)
+    //       this.push(this.alsoEmit({
+    //         nodeType: nodeType,
+    //         data: data
+    //       }))
+    //     })
+    //   }
+    // }
   }
 
   emitAllNodeTypes() {
     this.emitNodeTypes(...NodeTypes)
   }
 
-  onXml(event: NodeType, listener: (...args: any[]) => void): SAXStream {
-    return this.on(event, listener)
-  }
+  // onXml(event: NodeType, listener: (...args: any[]) => void): SAXStream {
+  //   return this.on(event, listener)
+  // }
 
-  onXmlEvent(listener: (nodeType: NodeType, data: any) => void): SAXStream {
-    return this.on('data', ({nodeType, data}) => listener(nodeType, data))
-  }
+  // onXmlEvent(listener: (nodeType: NodeType, data: any) => void): SAXStream {
+  //   return this.on('data', ({nodeType, data}) => listener(nodeType, data))
+  // }
 
   private alsoEmit(event: SAXDataEvent): SAXDataEvent {
     this.emit(event.nodeType, event.data)
@@ -101,43 +116,24 @@ export class SAXStream extends Transform {
 
   // Writable methods
   _write(chunk, encoding, callback) {
-    // The underlying source only deals with strings.
+    process.stdout.write('x')
     if (Buffer.isBuffer(chunk)) {
-      // console.log(`chunk before:`, chunk, chunk.length)
       chunk = this._decoder.write(chunk)
-      // console.log(`chunk:`, chunk, chunk.length)
-      // const end = this._decoder.end()
-      // if(end.length > 0) {
-      //   throw new Error(`Error: unsupported partial chunks of unicode strings, string decoder 'end' method returned non-zero length string from internal buffer: ${end}`)
-      // }
     }
-    // console.log('write to parser', chunk.length)
     this._parser.write(chunk.toString())
-    // console.log('write to parser -- done, callback', chunk.length)
+    for(const event of this._parser.saxDataEvents) {
+      this.push(event)
+    }
     callback();
   }
 
-  // SAXStream.prototype.write = function (data) {
-  //   if (typeof Buffer === 'function' &&
-  //     typeof Buffer.isBuffer === 'function' &&
-  //     Buffer.isBuffer(data)) {
-  //     if (!this._decoder) {
-  //       let SD = require('string_decoder').StringDecoder
-  //       this._decoder = new SD('utf8')
-  //     }
-  //     data = this._decoder.write(data)
-  //   }
-
-  //   this._parser.write(data.toString())
-  //   this.emit('data', data)
-  //   return true
-  // }
-
-
-  // SAXStream.prototype.end = function (chunk) {
-  _final(callback) {
-    this._parser.end()
-    callback()
+  _flush(callback) {
+    // See comment in SAXParser.closeText
+    this._parser.write(null)
+    for(const event of this._parser.saxDataEvents) {
+      this.push(event)
+    }
+    callback();
   }
 }
 

@@ -236,6 +236,7 @@ class SAXParser extends import_stream.EventEmitter {
     this.strictEntities = this.opt.strictEntities;
     this.ENTITIES = this.strictEntities ? Object.create(sax.XML_ENTITIES) : Object.create(sax.ENTITIES);
     this.attribList = [];
+    this.saxDataEvents = [];
     this.opt.extractRawTagContent = this.opt.extractRawTagContent || null;
     this.opt.extractRawTagContentEnabled = !!this.opt.extractRawTagContent;
     if (this.opt.extractRawTagContentEnabled) {
@@ -261,7 +262,6 @@ class SAXParser extends import_stream.EventEmitter {
     this.closeText();
     this.c = "";
     this.closed = true;
-    this.emit("end");
     this.reset();
     return this;
   }
@@ -278,11 +278,11 @@ class SAXParser extends import_stream.EventEmitter {
   flushBuffers() {
     this.closeText();
     if (this.cdata !== "") {
-      this.emitNode("cdata", this.cdata);
+      this.emitNode(ENodeTypes.cdata, this.cdata);
       this.cdata = "";
     }
     if (this.script !== "") {
-      this.emitNode("script", this.script);
+      this.emitNode(ENodeTypes.script, this.script);
       this.script = "";
     }
   }
@@ -290,16 +290,17 @@ class SAXParser extends import_stream.EventEmitter {
     if (this.textNode) {
       this.closeText();
     }
-    this.emit(nodeType, data);
+    this.saxDataEvents.push({ nodeType, data });
   }
   closeText() {
     this.textNode = textopts(this.opt, this.textNode);
     if (this.textNode) {
-      this.emit("text", this.textNode);
+      this.saxDataEvents.push({ nodeType: ENodeTypes.text, data: this.textNode });
     }
     this.textNode = "";
   }
   write(chunk) {
+    this.saxDataEvents = [];
     if (this.error) {
       throw this.error;
     }
@@ -418,7 +419,7 @@ class SAXParser extends import_stream.EventEmitter {
           continue;
         case S.SGML_DECL:
           if ((this.sgmlDecl + c).toUpperCase() === CDATA) {
-            this.emitNode("opencdata");
+            this.emitNode(ENodeTypes.opencdata);
             this.state = S.CDATA;
             this.sgmlDecl = "";
             this.cdata = "";
@@ -434,7 +435,7 @@ class SAXParser extends import_stream.EventEmitter {
             this.doctype = "";
             this.sgmlDecl = "";
           } else if (c === ">") {
-            this.emitNode("sgmldeclaration", this.sgmlDecl);
+            this.emitNode(ENodeTypes.sgmldeclaration, this.sgmlDecl);
             this.sgmlDecl = "";
             this.state = S.TEXT;
           } else if (isQuote(c)) {
@@ -454,7 +455,7 @@ class SAXParser extends import_stream.EventEmitter {
         case S.DOCTYPE:
           if (c === ">") {
             this.state = S.TEXT;
-            this.emitNode("doctype", this.doctype);
+            this.emitNode(ENodeTypes.doctype, this.doctype);
             this.doctype = "<saxparser_true>";
           } else {
             this.doctype += c;
@@ -501,7 +502,7 @@ class SAXParser extends import_stream.EventEmitter {
             this.state = S.COMMENT_ENDED;
             this.comment = textopts(this.opt, this.comment);
             if (this.comment) {
-              this.emitNode("comment", this.comment);
+              this.emitNode(ENodeTypes.comment, this.comment);
             }
             this.comment = "";
           } else {
@@ -536,9 +537,9 @@ class SAXParser extends import_stream.EventEmitter {
         case S.CDATA_ENDING_2:
           if (c === ">") {
             if (this.cdata) {
-              this.emitNode("cdata", this.cdata);
+              this.emitNode(ENodeTypes.cdata, this.cdata);
             }
-            this.emitNode("closecdata");
+            this.emitNode(ENodeTypes.closecdata);
             this.cdata = "";
             this.state = S.TEXT;
           } else if (c === "]") {
@@ -568,7 +569,7 @@ class SAXParser extends import_stream.EventEmitter {
           continue;
         case S.PROC_INST_ENDING:
           if (c === ">") {
-            this.emitNode("processinginstruction", {
+            this.emitNode(ENodeTypes.processinginstruction, {
               name: this.procInstName,
               body: this.procInstBody
             });
@@ -645,7 +646,7 @@ class SAXParser extends import_stream.EventEmitter {
             this.strictFail("Attribute without value");
             this.tag.attributes[this.attribName] = "";
             this.attribValue = "";
-            this.emitNode("attribute", {
+            this.emitNode(ENodeTypes.attribute, {
               name: this.attribName,
               value: ""
             });
@@ -812,7 +813,7 @@ class SAXParser extends import_stream.EventEmitter {
       let parent = this.tags[this.tags.length - 1] || this;
       if (tag.ns && parent.ns !== tag.ns) {
         Object.keys(tag.ns).forEach((p) => {
-          this.emitNode("opennamespace", {
+          this.emitNode(ENodeTypes.opennamespace, {
             prefix: p,
             uri: tag.ns[p]
           });
@@ -838,14 +839,14 @@ class SAXParser extends import_stream.EventEmitter {
           a.uri = prefix;
         }
         this.tag.attributes[name] = a;
-        this.emitNode("attribute", a);
+        this.emitNode(ENodeTypes.attribute, a);
       }
       this.attribList.length = 0;
     }
     this.tag.isSelfClosing = !!selfClosing;
     this.sawRoot = true;
     this.tags.push(this.tag);
-    this.emitNode("opentag", this.tag);
+    this.emitNode(ENodeTypes.opentag, this.tag);
     if (!selfClosing) {
       if (!this.noscript && this.tagName.toLowerCase() === "script") {
         this.state = S.SCRIPT;
@@ -872,7 +873,7 @@ class SAXParser extends import_stream.EventEmitter {
         this.state = S.SCRIPT;
         return;
       }
-      this.emitNode("script", this.script);
+      this.emitNode(ENodeTypes.script, this.script);
       this.script = "";
     }
     let t = this.tags.length;
@@ -901,12 +902,12 @@ class SAXParser extends import_stream.EventEmitter {
       let tag = this.tag = this.tags.pop();
       this.tagName = this.tag.name;
       if (this.opt.extractRawTagContentEnabled && this.path.join("/") === this.opt.extractRawTagContent) {
-        this.emitNode("extractedrawtag", fix_indent(this.rawTagExtract));
+        this.emitNode(ENodeTypes.extractedrawtag, fix_indent(this.rawTagExtract));
         this.rawTagExtract = "";
         this.rawTagTracking = false;
       }
       this.path.pop();
-      this.emitNode("closetag", this.tagName);
+      this.emitNode(ENodeTypes.closetag, this.tagName);
       let x = {};
       for (let i in tag.ns) {
         x[i] = tag.ns[i];
@@ -915,7 +916,7 @@ class SAXParser extends import_stream.EventEmitter {
       if (this.opt.xmlns && tag.ns !== parent.ns) {
         Object.keys(tag.ns).forEach((p) => {
           let n = tag.ns[p];
-          this.emitNode("closenamespace", { prefix: p, uri: n });
+          this.emitNode(ENodeTypes.closenamespace, { prefix: p, uri: n });
         });
       }
     }
@@ -936,11 +937,11 @@ class SAXParser extends import_stream.EventEmitter {
             this.closeText();
             break;
           case "cdata":
-            this.emitNode("cdata", this.cdata);
+            this.emitNode(ENodeTypes.cdata, this.cdata);
             this.cdata = "";
             break;
           case "script":
-            this.emitNode("script", this.script);
+            this.emitNode(ENodeTypes.script, this.script);
             this.script = "";
             break;
           default:
@@ -966,7 +967,7 @@ class SAXParser extends import_stream.EventEmitter {
       this.rawTagExtract = `<${this.tagName} `;
       this.rawTagTracking = true;
     }
-    this.emitNode("opentagstart", import_lodash.default.omit(tag, "attributes"));
+    this.emitNode(ENodeTypes.opentagstart, import_lodash.default.omit(tag, "attributes"));
   }
   _error(errorMessage) {
     this.closeText();
@@ -1012,7 +1013,7 @@ class SAXParser extends import_stream.EventEmitter {
       this.attribList.push([this.attribName, this.attribValue]);
     } else {
       this.tag.attributes[this.attribName] = this.attribValue;
-      this.emitNode("attribute", {
+      this.emitNode(ENodeTypes.attribute, {
         name: this.attribName,
         value: this.attribValue
       });

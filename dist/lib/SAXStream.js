@@ -31,39 +31,21 @@ var import_SAXParser = __toModule(require("./SAXParser.js"));
 class SAXStream extends import_stream.Transform {
   constructor(strict = false, opt = {}) {
     super({
-      readableObjectMode: true
+      readableObjectMode: true,
+      writableHighWaterMark: opt.highWaterMark || null,
+      readableHighWaterMark: 16
     });
     this.buffer = [];
     this._decoder = new import_string_decoder.StringDecoder("utf8");
+    this.ended = false;
     this._parser = new import_SAXParser.SAXParser(strict, opt);
     this._parser.on("end", () => {
-      this.emit("end");
-    });
-    this._parser.on("error", (er) => {
-      this.emit("error", er);
-      this._parser.error = null;
     });
   }
   emitNodeTypes(...nodeTypes) {
-    for (const nodeType of nodeTypes) {
-      if (this._parser.listenerCount(nodeType) === 0) {
-        this._parser.on(nodeType, (data) => {
-          this.push(this.alsoEmit({
-            nodeType,
-            data
-          }));
-        });
-      }
-    }
   }
   emitAllNodeTypes() {
     this.emitNodeTypes(...import_SAXParser.NodeTypes);
-  }
-  onXml(event, listener) {
-    return this.on(event, listener);
-  }
-  onXmlEvent(listener) {
-    return this.on("data", ({ nodeType, data }) => listener(nodeType, data));
   }
   alsoEmit(event) {
     this.emit(event.nodeType, event.data);
@@ -74,14 +56,21 @@ class SAXStream extends import_stream.Transform {
     callback(err);
   }
   _write(chunk, encoding, callback) {
+    process.stdout.write("x");
     if (Buffer.isBuffer(chunk)) {
       chunk = this._decoder.write(chunk);
     }
     this._parser.write(chunk.toString());
+    for (const event of this._parser.saxDataEvents) {
+      this.push(event);
+    }
     callback();
   }
-  _final(callback) {
-    this._parser.end();
+  _flush(callback) {
+    this._parser.write(null);
+    for (const event of this._parser.saxDataEvents) {
+      this.push(event);
+    }
     callback();
   }
 }

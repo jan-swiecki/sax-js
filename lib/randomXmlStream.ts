@@ -39,6 +39,7 @@ export type Depth = {
   maxTextSize: number,
   maxCDataSize: number,
   maxChildren: number,
+  trailingRandomText?: number
 }
 
 
@@ -222,6 +223,10 @@ export function randomXmlStream(options: Options): Readable & {finish: () => {}}
           yield '\n'
         }
       }
+    }
+
+    if(depth === 0 && d.trailingRandomText > 0) {
+      yield randomString(ceil(d.trailingRandomText * random()))
     }
   }
 }
