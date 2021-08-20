@@ -59,25 +59,24 @@ class SAXStream extends import_stream.Transform {
     if (Buffer.isBuffer(chunk)) {
       chunk = this._decoder.write(chunk);
     }
-    this._parser.write(chunk.toString());
-    if (this._parser.error) {
-      callback(this._parser.error);
-    } else {
-      for (const event of this._parser.saxDataEvents) {
-        this.push(event);
-      }
-      callback();
-    }
+    this.__push(() => this._parser.write(chunk.toString()), callback);
   }
   _flush(callback) {
-    this._parser.write(null);
-    if (this._parser.error) {
-      callback(this._parser.error);
-    } else {
-      for (const event of this._parser.saxDataEvents) {
-        this.push(event);
+    this.__push(() => this._parser.write(null), callback);
+  }
+  __push(parserWrite, callback) {
+    try {
+      parserWrite();
+      if (this._parser.error) {
+        callback(this._parser.error);
+      } else {
+        for (const event of this._parser.saxDataEvents) {
+          this.push(event);
+        }
+        callback();
       }
-      callback();
+    } catch (err) {
+      callback(err);
     }
   }
 }

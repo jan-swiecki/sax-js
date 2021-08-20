@@ -211,6 +211,7 @@ class SAXParser extends import_stream.EventEmitter {
     this.strict = strict;
     this.opt = opt;
     this.reset();
+    this.emit("ready");
   }
   clearBuffers() {
     for (let i = 0, l = buffers.length; i < l; i++) {
@@ -251,7 +252,6 @@ class SAXParser extends import_stream.EventEmitter {
     if (this.trackPosition) {
       this.position = this.line = this.column = 0;
     }
-    this.emit("ready");
   }
   end() {
     if (this.sawRoot && !this.closedRoot)
@@ -291,11 +291,13 @@ class SAXParser extends import_stream.EventEmitter {
       this.closeText();
     }
     this.saxDataEvents.push({ nodeType, data });
+    this.emit(nodeType, data);
   }
   closeText() {
     this.textNode = textopts(this.opt, this.textNode);
     if (this.textNode) {
       this.saxDataEvents.push({ nodeType: ENodeTypes.text, data: this.textNode });
+      this.emit(ENodeTypes.text, this.textNode);
     }
     this.textNode = "";
   }
@@ -967,7 +969,7 @@ class SAXParser extends import_stream.EventEmitter {
       this.rawTagExtract = `<${this.tagName} `;
       this.rawTagTracking = true;
     }
-    this.emitNode(ENodeTypes.opentagstart, import_lodash.default.omit(tag, "attributes"));
+    this.emitNode(ENodeTypes.opentagstart, tag);
   }
   _error(errorMessage) {
     this.closeText();
@@ -976,6 +978,7 @@ class SAXParser extends import_stream.EventEmitter {
     }
     const error = new Error(errorMessage);
     this.error = error;
+    this.emit("error", error);
     return this;
   }
   strictFail(message) {

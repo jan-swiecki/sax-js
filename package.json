@@ -12,7 +12,7 @@
   "license": "ISC",
   "scripts": {
     "build": "bin/build",
-    "test": "bin/build --for-testing && tap dist/test/*.js --cov -j4 --branches=60 --functions=60 --lines=60 --statements=60",
+    "test": "bin/build --for-testing && tap dist/test --cov -j4 --branches=60 --functions=60 --lines=60 --statements=60",
     "posttest": "standard test/*.js",
     "git-publish": "npm test && npm run build && git add . && git commit -m 'new distribution' && git push origin dev",
     "preversion": "npm test",

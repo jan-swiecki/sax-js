@@ -122,27 +122,32 @@ export class SAXStream extends Transform {
     // process.stdout.write('x'.repeat(chunk.length))
     // console.log(`x -- ${chunk.length}`)
     // console.log(`sax stream --`.padStart(15), chunk.length)
-    this._parser.write(chunk.toString())
-    if(this._parser.error) {
-      callback(this._parser.error)
-    } else {
-      for(const event of this._parser.saxDataEvents) {
-        this.push(event)
-      }
-      callback();
-    }
+    
+    this.__push(() => this._parser.write(chunk.toString()), callback);
   }
 
   _flush(callback) {
     // See comment in SAXParser.closeText
-    this._parser.write(null)
-    if(this._parser.error) {
-      callback(this._parser.error)
-    } else {
-      for(const event of this._parser.saxDataEvents) {
-        this.push(event)
+    this.__push(() => this._parser.write(null), callback)
+  }
+
+  private __push(parserWrite, callback: any) {
+    try {
+      parserWrite()
+
+      // Most probably we will not get error here, but in catch block.
+      // See SAXParser._error method for more information.
+      if (this._parser.error) {
+        callback(this._parser.error);
+      } else {
+        for (const event of this._parser.saxDataEvents) {
+          this.push(event);
+        }
+        callback();
       }
-      callback();
+
+    } catch(err) {
+      callback(err)
     }
   }
 }

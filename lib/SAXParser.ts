@@ -335,6 +335,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
     this.strict = strict
     this.opt = opt
     this.reset()
+    this.emit('ready')
   }
 
   private clearBuffers () {
@@ -385,7 +386,6 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
     if (this.trackPosition) {
       this.position = this.line = this.column = 0
     }
-    this.emit('ready')
   }
 
   end(): SAXParser {
@@ -433,16 +433,18 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
       this.closeText()
     }
     this.saxDataEvents.push({nodeType: nodeType, data})
-    // this.emit(nodeType, data)
+    this.emit(nodeType, data)
   }
   
   // TODO
-  // Not sure why textNode would be not empty during end.
-  // Text event that is being emitted here would be emitted after root tag is closed.
+  // 
+  // Wwhen closeText is called during end() I'm not sure why textNode would be not empty.
+  // In such case text event that is being emitted here would be emitted after root tag is closed.
   private closeText() {
     this.textNode = textopts(this.opt, this.textNode)
     if (this.textNode) {
       this.saxDataEvents.push({nodeType: ENodeTypes.text, data: this.textNode})
+      this.emit(ENodeTypes.text, this.textNode)
     }
     this.textNode = ''
   }
@@ -1221,7 +1223,7 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
       // console.log(' -- start tracking')
       // process.stdout.write(chalk.yellow.bold(`<${tag.name}>`))
     }
-    this.emitNode(ENodeTypes.opentagstart, _.omit(tag, 'attributes'))
+    this.emitNode(ENodeTypes.opentagstart, tag)
   }
  
   private _error(errorMessage: string) {
@@ -1234,10 +1236,10 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
     const error = new Error(errorMessage)
     this.error = error
 
-    // Dont emit error event
-    // See https://nodejs.org/api/events.html#events_error_events for more information
-    // The goal is to pass error handling to SAXStream, not throw from here
-    // this.emit('error', error)
+    // This will throw error if no error handler is attached. We leave this behaviour
+    // for backwards compatibility with current tests that use 'error' event.
+    // See https://nodejs.org/api/events.html#events_error_events for more information.
+    this.emit('error', error)
     return this
   }
   

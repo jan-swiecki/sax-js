@@ -8,8 +8,10 @@ const b = Buffer.from('误')
 
 tap.plan(6)
 
-saxStream.on('text', function (text) {
-  tap.equal(text, b.toString())
+saxStream.on('data', function ({ nodeType, data }) {
+  if (nodeType === 'text') {
+    tap.equal(data, b.toString())
+  }
 })
 
 saxStream.write(Buffer.from('<test><a>'))
@@ -27,8 +29,10 @@ saxStream.end(Buffer.concat([b.slice(1), Buffer.from('</d></test>')]))
 const saxStream2 = new SAXStream()
 saxStream2.emitAllNodeTypes()
 
-saxStream2.on('text', function (text) {
-  tap.equal(text, '�')
+saxStream2.on('data', function ({ nodeType, data }) {
+  if (nodeType === 'text') {
+    tap.equal(data, '�')
+  }
 })
 
 saxStream2.write(Buffer.from('<root>'))

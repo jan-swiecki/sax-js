@@ -55,7 +55,6 @@ function check(N: number, maxSize: number, highWaterMark: number) {
     let c2         = {total: 0}
     
     const check = () => {
-      console.log('stop and check')
       const t1 = c1.total
       const t2 = c2.total
       const diffPercent = Math.abs(t2-t1)/t2
