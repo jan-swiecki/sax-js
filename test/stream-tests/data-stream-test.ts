@@ -7,15 +7,15 @@ let saxStream = new SAXStream()
 
 saxStream.emitAllNodeTypes()
 
-tap.plan(2)
+tap.plan(1)
 saxStream.on('data', (data: SAXDataEvent) => {
   if(data.nodeType === 'text') {
     tap.equal(data.data, 'text')
   }
 })
-saxStream.on('text', data => {
-  tap.equal(data, 'text')
-})
+// saxStream.on('text', data => {
+//   tap.equal(data, 'text')
+// })
 
 saxStream.write('<div>text</div>')
 saxStream.end()

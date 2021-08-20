@@ -20,14 +20,11 @@ var import_SAXStream = __toModule(require("../../lib/SAXStream"));
 const tap = require("tap");
 let saxStream = new import_SAXStream.SAXStream();
 saxStream.emitAllNodeTypes();
-tap.plan(2);
+tap.plan(1);
 saxStream.on("data", (data) => {
   if (data.nodeType === "text") {
     tap.equal(data.data, "text");
   }
-});
-saxStream.on("text", (data) => {
-  tap.equal(data, "text");
 });
 saxStream.write("<div>text</div>");
 saxStream.end();

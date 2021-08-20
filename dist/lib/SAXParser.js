@@ -302,7 +302,7 @@ class SAXParser extends import_stream.EventEmitter {
   write(chunk) {
     this.saxDataEvents = [];
     if (this.error) {
-      throw this.error;
+      return;
     }
     if (this.closed) {
       return this._error("Cannot write after close. Assign an onready handler.");
@@ -976,7 +976,6 @@ class SAXParser extends import_stream.EventEmitter {
     }
     const error = new Error(errorMessage);
     this.error = error;
-    this.emit("error", error);
     return this;
   }
   strictFail(message) {

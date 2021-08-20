@@ -5,6 +5,7 @@ import { Depth, randomXmlStream } from '../../lib/randomXmlStream';
 import { SAXDataEvent, SAXStream } from '../../lib/SAXStream';
 import { ENodeTypes } from '../../lib/SAXParser';
 import _ = require('lodash');
+import xmlBeautifier from '../../lib/xml-beautifier';
 
 
 const saxStream = new SAXStream(true)
@@ -37,7 +38,7 @@ randomXmlStream({
   trailingEndLine: false
 })
   .pipe(through2(function(chunk, encoding, callback) {
-    process.stdout.write(chunk)
+    // process.stdout.write(chunk)
     inputXml = inputXml + chunk
     this.push(chunk)
     callback()
@@ -53,10 +54,7 @@ randomXmlStream({
     callback()
   }))
   .on('finish', () => {
-    console.log(inputXml)
-    console.log('-------------')
-    console.log(outputXml)
-    // tap.equal(outputXml, inputXml)
+    tap.equal(xmlBeautifier(outputXml), xmlBeautifier(inputXml))
   })
 
 

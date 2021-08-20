@@ -23,11 +23,7 @@ devzero.pipe(t1 = through2(function(chunk, encoding, callback) {
   this.push(chunk);
   callback();
 })).pipe(devnull);
-const interval = setInterval(() => {
-  console.log(t1.isPaused(), t2.isPaused());
-}, 0);
 function test() {
-  clearInterval(interval);
   const diffPercent = Math.abs(c2 - c1) / c2;
   tap.ok(diffPercent < 0.01, `diffPercent < 0.01, diffPercent=${diffPercent}`);
 }

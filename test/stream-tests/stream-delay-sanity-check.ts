@@ -87,7 +87,7 @@ function check(N: number, maxSize: number, highWaterMark: number) {
     let stopped = false
     debug('devzero', devzero)
       .pipe(debug('pipe1', new Transform({transform(chunk, encoding, callback) {
-        process.stdout.write('.')
+        // process.stdout.write('.')
         inputXml += chunk
 
         if(stopped) {
@@ -96,13 +96,9 @@ function check(N: number, maxSize: number, highWaterMark: number) {
 
         if(c1.total > maxSize && !stopped) {
           stopped = true
-          // devzero.unshift(null)
           devzero.destroy()
           this.push(null)
           callback()
-          // this.end()
-          // devzero.unpipe()
-          // callback()
           return
         }
 
@@ -110,11 +106,6 @@ function check(N: number, maxSize: number, highWaterMark: number) {
         this.push(chunk)
         callback()
       }})))
-      // .pipe(through2(function(chunk, encoding, callback) {
-      //   intermediateXml += chunk
-      //   this.push(chunk)
-      //   callback()
-      // }))
       .pipe(new Transform({
         transform(chunk, encoding, callback) {
           const x = t;
@@ -131,12 +122,11 @@ function check(N: number, maxSize: number, highWaterMark: number) {
             await new Promise(r => setTimeout(r, 0))
           }
 
-          console.log('flushed')
           callback()
         }
       }))
       .pipe(debug('pipe2', through2(function(chunk, encoding, callback) {
-        process.stdout.write(',')
+        // process.stdout.write(',')
         outputXml += chunk
         c2.total += chunk.length
         this.push(chunk)

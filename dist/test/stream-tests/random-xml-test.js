@@ -19,6 +19,7 @@ var __toModule = (module2) => {
 var import_randomXmlStream = __toModule(require("../../lib/randomXmlStream"));
 var import_SAXStream = __toModule(require("../../lib/SAXStream"));
 var import_SAXParser = __toModule(require("../../lib/SAXParser"));
+var import_xml_beautifier = __toModule(require("../../lib/xml-beautifier"));
 const through2 = require("through2");
 const tap = require("tap");
 const _ = require("lodash");
@@ -45,7 +46,6 @@ tap.plan(1);
   },
   trailingEndLine: false
 }).pipe(through2(function(chunk, encoding, callback) {
-  process.stdout.write(chunk);
   inputXml = inputXml + chunk;
   this.push(chunk);
   callback();
@@ -66,7 +66,5 @@ tap.plan(1);
   }
   callback();
 })).on("finish", () => {
-  console.log(inputXml);
-  console.log("-------------");
-  console.log(outputXml);
+  tap.equal((0, import_xml_beautifier.default)(outputXml), (0, import_xml_beautifier.default)(inputXml));
 });

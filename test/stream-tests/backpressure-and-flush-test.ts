@@ -83,7 +83,7 @@ function check(N: number, maxSize: number, highWaterMark: number, trailingRandom
       const t1 = xmlBeautifier(inputXml).length
       const t2 = xmlBeautifier(outputXml).length
       const diffPercent = Math.abs(t2-t1)/t2
-      tap.ok(diffPercent == 0, `diffPercent == 0, t1=${t1} t2=${t2} diffPercent=${diffPercent.toFixed(3)}, N=${N}, xml stream size=${formatBytes(maxSize)}, highWaterMark=${formatBytes(highWaterMark)}, trailingRandomText=${trailingRandomText}`)
+      tap.ok(diffPercent < 0.00001, `diffPercent == 0, t1=${t1} t2=${t2} diffPercent=${diffPercent.toFixed(3)}, N=${N}, xml stream size=${formatBytes(maxSize)}, highWaterMark=${formatBytes(highWaterMark)}, trailingRandomText=${trailingRandomText}`)
       resolve()
     }
   

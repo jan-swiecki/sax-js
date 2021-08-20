@@ -81,7 +81,7 @@ function check(N, maxSize, highWaterMark, trailingRandomText = false) {
       const t1 = (0, import_xml_beautifier.default)(inputXml).length;
       const t2 = (0, import_xml_beautifier.default)(outputXml).length;
       const diffPercent = Math.abs(t2 - t1) / t2;
-      tap.ok(diffPercent == 0, `diffPercent == 0, t1=${t1} t2=${t2} diffPercent=${diffPercent.toFixed(3)}, N=${N}, xml stream size=${(0, import_SpeedFormatters.formatBytes)(maxSize)}, highWaterMark=${(0, import_SpeedFormatters.formatBytes)(highWaterMark)}, trailingRandomText=${trailingRandomText}`);
+      tap.ok(diffPercent < 1e-5, `diffPercent == 0, t1=${t1} t2=${t2} diffPercent=${diffPercent.toFixed(3)}, N=${N}, xml stream size=${(0, import_SpeedFormatters.formatBytes)(maxSize)}, highWaterMark=${(0, import_SpeedFormatters.formatBytes)(highWaterMark)}, trailingRandomText=${trailingRandomText}`);
       resolve();
     }, "check");
     let stopped = false;

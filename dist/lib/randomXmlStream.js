@@ -31,7 +31,7 @@ const _ = require("lodash");
 const { random, round, ceil } = Math;
 const alnum = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 const alphabetic = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-function randomString(len = 10, chars = alnum, garbageProbability = 0, dontRepeatValues = null, retries = 3) {
+function randomString(len = 10, chars = alnum, garbageProbability = 0, dontRepeatValues = null, retries = 10) {
   if (retries === 0) {
     throw new Error(`randomString: maximum retires reached, dontRepeatValue are getting repeated: ${[...dontRepeatValues.values()].join(", ")} (len=${len}, chars=${chars}, garbageProbability=${garbageProbability})`);
   }

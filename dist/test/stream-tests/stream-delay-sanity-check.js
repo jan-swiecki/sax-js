@@ -62,7 +62,6 @@ function check(N, maxSize, highWaterMark) {
     let wait = [];
     let stopped = false;
     debug("devzero", devzero).pipe(debug("pipe1", new import_stream.Transform({ transform(chunk, encoding, callback) {
-      process.stdout.write(".");
       inputXml += chunk;
       if (stopped) {
         callback();
@@ -91,11 +90,9 @@ function check(N, maxSize, highWaterMark) {
         while (_.sum(wait) > 0) {
           await new Promise((r) => setTimeout(r, 0));
         }
-        console.log("flushed");
         callback();
       }
     })).pipe(debug("pipe2", through2(function(chunk, encoding, callback) {
-      process.stdout.write(",");
       outputXml += chunk;
       c2.total += chunk.length;
       this.push(chunk);

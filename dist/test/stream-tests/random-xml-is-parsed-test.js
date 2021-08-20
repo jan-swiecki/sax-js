@@ -19,10 +19,20 @@ var __toModule = (module2) => {
 };
 var import_randomXmlStream = __toModule(require("../../lib/randomXmlStream"));
 var import_SAXStream = __toModule(require("../../lib/SAXStream"));
-var import_stream = __toModule(require("stream"));
 const _ = require("lodash");
 const tap = require("tap");
+tap.resolves(check(0), "resolves 1");
+tap.resolves(check(0), "resolves 2");
+tap.resolves(check(0), "resolves 3");
+tap.resolves(check(0), "resolves 4");
+tap.resolves(check(0), "resolves 5");
+tap.resolves(check(0), "resolves 6");
+tap.resolves(check(0), "resolves 7");
 tap.rejects(check(1), "rejects 8");
+tap.rejects(check(0.8), "rejects 9");
+tap.rejects(check(0.6), "rejects 10");
+tap.rejects(check(0.4), "rejects 11");
+tap.rejects(check(0.2), "rejects 12");
 function check(garbageProbability) {
   return new Promise((resolve, reject) => {
     const saxStream = new import_SAXStream.SAXStream(true);
@@ -45,13 +55,7 @@ function check(garbageProbability) {
       },
       trailingEndLine: false,
       garbageProbability
-    }).pipe(new import_stream.Transform({
-      transform(chunk, encoding, callback) {
-        process.stdout.write(`'''${chunk}''' `);
-        this.push(chunk);
-        callback();
-      }
-    })).pipe(saxStream).on("error", (err) => {
+    }).pipe(saxStream).on("error", (err) => {
       reject(err);
     }).on("finish", () => {
       resolve();

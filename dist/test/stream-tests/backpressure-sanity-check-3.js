@@ -17,17 +17,14 @@ var __reExport = (target, module2, desc) => {
 var __toModule = (module2) => {
   return __reExport(__markAsModule(__defProp(module2 != null ? __create(__getProtoOf(module2)) : {}, "default", module2 && module2.__esModule && "default" in module2 ? { get: () => module2.default, enumerable: true } : { value: module2, enumerable: true })), module2);
 };
-var import_speed = __toModule(require("../../lib/speed"));
-var import_SpeedFormatters = __toModule(require("../../lib/SpeedFormatters"));
 var import_stream = __toModule(require("stream"));
 const fs = require("fs");
 const tap = require("tap");
 const through2 = require("through2");
 const devzero = fs.createReadStream("/dev/zero");
 const devnull = fs.createWriteStream("/dev/null");
-const speedMeter = (0, import_speed.getSpeedMeter)().start();
-const c1 = speedMeter.addCounter("/dev/null", import_SpeedFormatters.bytesEmojiFormatter);
-const c2 = speedMeter.addCounter("second pipe", import_SpeedFormatters.bytesEmojiFormatter);
+let c1 = 0;
+let c2 = 0;
 class SlowTransform extends import_stream.Transform {
   constructor() {
     super();
@@ -43,18 +40,17 @@ class SlowTransform extends import_stream.Transform {
 __name(SlowTransform, "SlowTransform");
 tap.plan(1);
 devzero.pipe(through2(function(chunk, encoding, callback) {
-  c1.tick(chunk.length);
+  c1 += chunk.length;
   this.push(chunk);
   callback();
 })).pipe(new SlowTransform()).pipe(through2(function(chunk, encoding, callback) {
-  c2.tick(chunk.length);
+  c2 += chunk.length;
   callback();
 })).pipe(devnull);
 setTimeout(() => {
   devzero.unpipe();
-  speedMeter.stop();
-  const t1 = c1.total;
-  const t2 = c2.total;
+  const t1 = c1;
+  const t2 = c2;
   const diffPercent = Math.abs(t2 - t1) / t2;
   tap.ok(diffPercent < 0.2, `diffPercent < 0.2, diffPercent=${diffPercent}`);
 }, 1e3);

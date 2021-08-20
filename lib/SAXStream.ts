@@ -136,10 +136,14 @@ export class SAXStream extends Transform {
   _flush(callback) {
     // See comment in SAXParser.closeText
     this._parser.write(null)
-    for(const event of this._parser.saxDataEvents) {
-      this.push(event)
+    if(this._parser.error) {
+      callback(this._parser.error)
+    } else {
+      for(const event of this._parser.saxDataEvents) {
+        this.push(event)
+      }
+      callback();
     }
-    callback();
   }
 }
 

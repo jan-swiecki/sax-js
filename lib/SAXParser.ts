@@ -451,7 +451,8 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
     this.saxDataEvents = []
 
     if (this.error) {
-      throw this.error
+      // throw this.error
+      return
     }
     if (this.closed) {
       return this._error(
@@ -1232,7 +1233,11 @@ export class SAXParser extends EventEmitter implements Record<BufferName, string
     }
     const error = new Error(errorMessage)
     this.error = error
-    this.emit('error', error)
+
+    // Dont emit error event
+    // See https://nodejs.org/api/events.html#events_error_events for more information
+    // The goal is to pass error handling to SAXStream, not throw from here
+    // this.emit('error', error)
     return this
   }
   
