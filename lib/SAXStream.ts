@@ -60,7 +60,7 @@ export class SAXStream extends Transform {
       readableObjectMode: true,
       // highWaterMark: opt.highWaterMark || null,
       writableHighWaterMark: opt.highWaterMark || null,
-      readableHighWaterMark: 16,
+      readableHighWaterMark: opt.objHighWaterMark || 16,
     })
     this._parser = new SAXParser(strict, opt)
 
@@ -116,10 +116,12 @@ export class SAXStream extends Transform {
 
   // Writable methods
   _write(chunk, encoding, callback) {
-    process.stdout.write('x')
     if (Buffer.isBuffer(chunk)) {
       chunk = this._decoder.write(chunk)
     }
+    // process.stdout.write('x'.repeat(chunk.length))
+    // console.log(`x -- ${chunk.length}`)
+    // console.log(`sax stream --`.padStart(15), chunk.length)
     this._parser.write(chunk.toString())
     for(const event of this._parser.saxDataEvents) {
       this.push(event)

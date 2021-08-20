@@ -23,6 +23,7 @@ var __toModule = (module2) => {
   return __reExport(__markAsModule(__defProp(module2 != null ? __create(__getProtoOf(module2)) : {}, "default", module2 && module2.__esModule && "default" in module2 ? { get: () => module2.default, enumerable: true } : { value: module2, enumerable: true })), module2);
 };
 __export(exports, {
+  RandomReadable: () => RandomReadable,
   randomXmlStream: () => randomXmlStream
 });
 var import_stream = __toModule(require("stream"));
@@ -120,6 +121,39 @@ function* randomAttributesString(maxAttributes, maxAttributeKeySize, maxAttribut
   }
 }
 __name(randomAttributesString, "randomAttributesString");
+class RandomReadable extends import_stream.Readable {
+  constructor(randomXml, stop) {
+    super();
+    this.buffer = "";
+    this.randomXml = randomXml;
+    this.stop = stop;
+  }
+  _construct(callback) {
+    this.generator = this.randomXml();
+    callback();
+  }
+  _read(size) {
+    let s = 0;
+    let next;
+    do {
+      next = this.generator.next();
+      if (!next.done) {
+        this.buffer += next.value;
+      }
+    } while (!next.done && this.buffer.length < size);
+    const buf = this.buffer;
+    setImmediate(() => this.push(buf));
+    this.buffer = "";
+  }
+  _destroy(err, callback) {
+    this.buffer = "";
+    this.stop.stop = true;
+  }
+  finish() {
+    this.stop.stop = true;
+  }
+}
+__name(RandomReadable, "RandomReadable");
 function randomXmlStream(options) {
   const depthGenerator = gen(options.depthGenerator);
   const depthResults = [];
@@ -127,7 +161,7 @@ function randomXmlStream(options) {
   const garbageProbability = _.isUndefined(options.garbageProbability) ? 0 : options.garbageProbability;
   const format = _.isUndefined(options.format) ? true : options.format;
   const highwaterMark = options.highWatermark || 16 * 1024;
-  let stop = false;
+  let stop = { stop: false };
   const ret = import_stream.Readable.from(async function* () {
     let h = highwaterMark;
     let buffer = "";
@@ -142,7 +176,7 @@ function randomXmlStream(options) {
     yield buffer;
   }());
   ret.finish = () => {
-    stop = true;
+    stop.stop = true;
   };
   return ret;
   function* randomXml(depth = 0) {
@@ -155,7 +189,7 @@ function randomXmlStream(options) {
     const d = depthRes.value;
     let maxChildren = depth === 0 ? 1 : ceil(d.maxChildren * random());
     if (maxChildren >= 1) {
-      while (maxChildren-- && !stop) {
+      while (maxChildren-- && !stop.stop) {
         const tag = randomString(10, alphabetic, garbageProbability);
         yield* openTag(tag, d, indent, format);
         yield* randomXml(depth + 1);
@@ -175,5 +209,6 @@ function randomXmlStream(options) {
 __name(randomXmlStream, "randomXmlStream");
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  RandomReadable,
   randomXmlStream
 });

@@ -86,7 +86,8 @@ function check(N: number, maxSize: number, highWaterMark: number, trailingRandom
         }
       },
       trailingEndLine: false,
-      highWatermark: highWaterMark
+      highWatermark: highWaterMark,
+      slow: true
     })
 
   

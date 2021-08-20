@@ -33,7 +33,7 @@ class SAXStream extends import_stream.Transform {
     super({
       readableObjectMode: true,
       writableHighWaterMark: opt.highWaterMark || null,
-      readableHighWaterMark: 16
+      readableHighWaterMark: opt.objHighWaterMark || 16
     });
     this.buffer = [];
     this._decoder = new import_string_decoder.StringDecoder("utf8");
@@ -56,7 +56,6 @@ class SAXStream extends import_stream.Transform {
     callback(err);
   }
   _write(chunk, encoding, callback) {
-    process.stdout.write("x");
     if (Buffer.isBuffer(chunk)) {
       chunk = this._decoder.write(chunk);
     }

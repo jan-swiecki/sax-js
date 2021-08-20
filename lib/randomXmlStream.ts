@@ -49,6 +49,7 @@ type Options = {
   format?: boolean,
   garbageProbability?: number,
   highWatermark?: number
+  slow?: boolean
 }
 
 
@@ -144,7 +145,59 @@ function * randomAttributesString(maxAttributes, maxAttributeKeySize, maxAttribu
 }
 
 
-export function randomXmlStream(options: Options): Readable & {finish: () => {}} {
+export class RandomReadable extends Readable {
+  private generator: IterableIterator<string>;
+  private buffer = ''
+  private randomXml: any;
+  private stop: { stop: boolean; };
+
+  constructor(randomXml, stop: {stop: boolean}) {
+    super();
+    this.randomXml = randomXml
+    this.stop = stop
+  }
+
+  override _construct(callback) {
+    this.generator = this.randomXml()
+    callback()
+  }
+
+  _read(size) {
+    let s = 0
+    let next;
+
+    do {
+      next = this.generator.next()
+      if(! next.done) {
+        this.buffer += next.value;
+      }
+    } while(!next.done && this.buffer.length < size)
+
+    // if(this.buffer.length > size) {
+    //   const x = this.buffer.substring(size, this.buffer.length)
+    //   this.push(this.buffer)
+    //   this.buffer = x;
+    // } else {
+    //   this.push(this.buffer);
+    // }
+    const buf = this.buffer;
+    setImmediate(() => this.push(buf))
+    this.buffer = '';
+  }
+
+  _destroy(err, callback) {
+    this.buffer = ''
+    this.stop.stop = true
+  }
+
+  finish() {
+    this.stop.stop = true
+  }
+}
+
+
+// export function randomXmlStream(options: Options): RandomReadable {
+export function randomXmlStream(options: Options): Readable & {finish: () => void} {
   const depthGenerator = gen(options.depthGenerator)
   const depthResults: IteratorResult<Depth>[] = []
 
@@ -155,20 +208,14 @@ export function randomXmlStream(options: Options): Readable & {finish: () => {}}
 
   const highwaterMark = options.highWatermark || 16*1024;
   
-  let stop = false
+  let stop = {stop: false}
 
   // @ts-ignore
   const ret = Readable.from(async function *() {
-    // yield * randomXml()
     let h = highwaterMark
     let buffer = ''
 
     for(const chunk of randomXml()) {
-      // if(stop) {
-      //   buffer = ''
-      //   // yield null
-      //   break;
-      // }
       buffer += chunk
       if(buffer.length > highwaterMark) {
         yield buffer
@@ -179,24 +226,18 @@ export function randomXmlStream(options: Options): Readable & {finish: () => {}}
       }
     }
     yield buffer
-    // for(const chunk of randomXml()) {
-    //   buffer += chunk
-    //   if(buffer.length > highwaterMark) {
-    //     yield buffer
-    //     buffer = ''
-    //   }
-    // }
-    // yield buffer
   }());
 
   // @ts-ignore
   ret.finish = () => {
-    stop = true;
+    stop.stop = true;
   };
 
   // @ts-ignore
   return ret;
 
+
+  // return new RandomReadable(randomXml, stop)
 
   function * randomXml(depth = 0): IterableIterator<string> {
     const indent        = format ? '  '.repeat(depth) : ''
@@ -213,7 +254,7 @@ export function randomXmlStream(options: Options): Readable & {finish: () => {}}
     let maxChildren = depth === 0 ? 1 : ceil(d.maxChildren * random())
     
     if(maxChildren >= 1) {
-      while(maxChildren-- && !stop) {
+      while(maxChildren-- && !stop.stop) {
         const tag = randomString(10, alphabetic, garbageProbability)
         yield * openTag(tag, d, indent, format)
         yield * randomXml(depth+1)

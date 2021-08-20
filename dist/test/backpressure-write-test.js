@@ -30,7 +30,16 @@ const kb = 1024;
 const mb = 1024 * 1024;
 const gb = 1024 * 1024 * 1024;
 const test_cases = [
-  [2, 10 * mb, kb]
+  [2, 16 * kb, 512],
+  [2, 35 * kb, 512],
+  [2, 64 * kb, 512],
+  [2, 128 * kb, 512],
+  [2, 128 * kb, 16 * kb],
+  [2, mb, 32 * kb],
+  [2, 10 * mb, kb],
+  [2, mb, 16 * kb],
+  [3, mb, 32 * kb],
+  [4, mb, 32 * kb]
 ];
 async function run() {
   tap.plan(test_cases.length);
@@ -40,10 +49,14 @@ async function run() {
 }
 __name(run, "run");
 run();
+setTimeout(() => {
+}, 1e3);
 function check(N, maxSize, highWaterMark, trailingRandomText = false) {
   return new Promise((resolve, reject) => {
+    const objHighWaterMark = 1024;
     const saxStream = new import_SAXStream.SAXStream(false, {
-      highWaterMark
+      highWaterMark,
+      objHighWaterMark
     });
     saxStream.emitAllNodeTypes();
     let inputXml = "";
@@ -93,47 +106,35 @@ function check(N, maxSize, highWaterMark, trailingRandomText = false) {
           stopped = true;
           infiniteXml.finish();
         }
-        c1.total += chunk.toString().replace(/\n/g, "").length;
-        process.stdout.write("________________");
+        c1.total += chunk.toString().replace(/\n|\s/g, "").length;
         this.push(chunk);
         callback();
       }
-    }))).pipe(debug("saxStream", saxStream)).pipe(debug("to_string", new import_stream.Transform({
-      writableHighWaterMark: 16,
+    }))).pipe(debug("saxStream", saxStream)).pipe(debug("x", new import_stream.Transform({
+      writableHighWaterMark: objHighWaterMark,
       readableHighWaterMark: highWaterMark,
       writableObjectMode: true,
       transform(node, encoding, callback) {
         let x = "";
         switch (node.nodeType) {
           case import_SAXParser.ENodeTypes.opentag:
-            this.push(x = `<${node.data.name}${_.map(node.data.attributes, (v, k) => ` ${k}="${v}"`).join("")}${node.data.isSelfClosing ? "/" : ""}>`);
+            x = `<${node.data.name}${_.map(node.data.attributes, (v, k) => ` ${k}="${v}"`).join("")}${node.data.isSelfClosing ? "/" : ""}>`;
             break;
           case import_SAXParser.ENodeTypes.closetag:
-            this.push(x = `</${node.data}>`);
+            x = `</${node.data}>`;
             break;
           case import_SAXParser.ENodeTypes.text:
-            this.push(x = node.data);
+            x = node.data;
             break;
           case import_SAXParser.ENodeTypes.cdata:
-            this.push(x = `<![CDATA[${node.data}]]>`);
+            x = `<![CDATA[${node.data}]]>`;
             break;
         }
-        if (x !== "-") {
-          process.stdout.write("-");
+        if (x !== "") {
+          c2.total += x.replace(/\n|\s/g, "").length;
+          this.push(",");
         }
         callback();
-      }
-    }))).pipe(debug("pipe_last", new import_stream.Transform({
-      readableHighWaterMark: highWaterMark,
-      writableHighWaterMark: highWaterMark,
-      transform(chunk, encoding, callback) {
-        i++;
-        setTimeout(() => {
-          process.stdout.write(",");
-          c2.total += chunk.toString().replace(/\n/g, "").length;
-          this.push(chunk);
-          callback();
-        }, 0);
       }
     }))).on("end", () => {
       check2();
