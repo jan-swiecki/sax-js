@@ -21,6 +21,7 @@ export type SAXTag = {
 
 export type SAXText  = string
 export type SAXCData = string
+export type SAXExtractedRawTag = string
 
 // export type SAXData = SAXAttribute
 
@@ -40,7 +41,7 @@ export type SAXDataEvent =
   | {nodeType: ENodeTypes.doctype,      data: SAXTodo}
   | {nodeType: ENodeTypes.comment,      data: SAXTodo}
   | {nodeType: ENodeTypes.processinginstruction,   data: SAXTodo}
-  | {nodeType: ENodeTypes.extractedrawtag,         data: SAXTodo}
+  | {nodeType: ENodeTypes.extractedrawtag,         data: SAXExtractedRawTag}
   | {nodeType: ENodeTypes.sgmldeclaration,         data: SAXTodo}
   | {nodeType: ENodeTypes.opennamespace,           data: SAXTodo}
   | {nodeType: ENodeTypes.closenamespace,          data: SAXTodo}

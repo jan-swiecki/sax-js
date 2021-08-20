@@ -256,7 +256,7 @@ function charAt (chunk, i) {
   return result
 }
 
-function fix_indent(xml) {
+function fix_indent(xml: string): string {
   return xmlBeautifier(xml, 2);
 }
 

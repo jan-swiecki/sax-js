@@ -22,6 +22,7 @@ export declare type SAXTag = {
 };
 export declare type SAXText = string;
 export declare type SAXCData = string;
+export declare type SAXExtractedRawTag = string;
 export declare type SAXDataEvent = {
     nodeType: ENodeTypes.attribute;
     data: SAXAttribute;
@@ -57,7 +58,7 @@ export declare type SAXDataEvent = {
     data: SAXTodo;
 } | {
     nodeType: ENodeTypes.extractedrawtag;
-    data: SAXTodo;
+    data: SAXExtractedRawTag;
 } | {
     nodeType: ENodeTypes.sgmldeclaration;
     data: SAXTodo;

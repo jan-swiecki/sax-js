@@ -35,7 +35,7 @@ const isSelfClosingTag = str => /<[^>]+\/>/.test(str);
 const isOpeningTag = str => isTag(str) && !isClosingTag(str) && !isSelfClosingTag(str) && !isXMLDeclaration(str);
 
 
-export default (xml: string, spaces: number = 2) => {
+export default (xml: string, spaces: number = 2): string => {
   let depth = 0;
   const indent = spaces ? _.repeat(' ', spaces) : '  '
 
