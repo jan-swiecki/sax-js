@@ -143,7 +143,7 @@ function * randomAttributesString(maxAttributes, maxAttributeKeySize, maxAttribu
 }
 
 
-export function randomXmlStream(options: Options): Readable & {stop: () => {}} {
+export function randomXmlStream(options: Options): Readable & {finish: () => {}} {
   const depthGenerator = gen(options.depthGenerator)
   const depthResults: IteratorResult<Depth>[] = []
 
@@ -163,11 +163,11 @@ export function randomXmlStream(options: Options): Readable & {stop: () => {}} {
     let buffer = ''
 
     for(const chunk of randomXml()) {
-      if(stop) {
-        buffer = ''
-        // yield null
-        break;
-      }
+      // if(stop) {
+      //   buffer = ''
+      //   // yield null
+      //   break;
+      // }
       buffer += chunk
       if(buffer.length > highwaterMark) {
         yield buffer
@@ -189,7 +189,7 @@ export function randomXmlStream(options: Options): Readable & {stop: () => {}} {
   }());
 
   // @ts-ignore
-  ret.stop = () => {
+  ret.finish = () => {
     stop = true;
   };
 
@@ -210,9 +210,9 @@ export function randomXmlStream(options: Options): Readable & {stop: () => {}} {
 
     // XML can have only one root
     let maxChildren = depth === 0 ? 1 : ceil(d.maxChildren * random())
-
+    
     if(maxChildren >= 1) {
-      while(maxChildren--) {
+      while(maxChildren-- && !stop) {
         const tag = randomString(10, alphabetic, garbageProbability)
         yield * openTag(tag, d, indent, format)
         yield * randomXml(depth+1)

@@ -48,6 +48,7 @@ function check(N, maxSize, highWaterMark) {
     const saxStream = new import_SAXStream.SAXStream(true);
     saxStream.emitAllNodeTypes();
     let inputXml = "";
+    let intermediateXml = "";
     let outputXml = "";
     let size = 0;
     const devnull = fs.createWriteStream("/dev/null");
@@ -72,60 +73,53 @@ function check(N, maxSize, highWaterMark) {
       trailingEndLine: false,
       highWatermark: highWaterMark
     });
-    const stopAndCheck = /* @__PURE__ */ __name(() => {
+    const check2 = /* @__PURE__ */ __name(() => {
       console.log("stop and check");
-      infiniteXml.stop();
       const t1 = c1.total;
       const t2 = c2.total;
       const diffPercent = Math.abs(t2 - t1) / t2;
-      tap.ok(diffPercent < 0.05, `diffPercent < 0.05, t1=${t1} t2=${t2} diffPercent=${diffPercent.toFixed(3)}, N=${N}, xml stream size=${(0, import_SpeedFormatters.formatBytes)(maxSize)}`);
+      tap.ok(diffPercent < 0.05, `diffPercent < 0.05, t1=${t1} t2=${t2} diffPercent=${diffPercent.toFixed(3)}, N=${N}, xml stream size=${(0, import_SpeedFormatters.formatBytes)(maxSize)}, highWaterMark=${(0, import_SpeedFormatters.formatBytes)(highWaterMark)}`);
       resolve();
-    }, "stopAndCheck");
+    }, "check");
     let stopped = false;
     infiniteXml.pipe(through2(function(chunk, encoding, callback) {
-      if (stopped) {
-        callback();
-        return;
-      }
-      if (c1.total > maxSize) {
+      inputXml += chunk;
+      if (c1.total > maxSize && !stopped) {
         stopped = true;
-        stopAndCheck();
-      } else {
-        c1.total += chunk.length;
-        this.push(chunk);
+        infiniteXml.finish();
       }
+      c1.total += chunk.length;
+      this.push(chunk);
       callback();
-    })).pipe(saxStream).on("error", (err) => {
-    }).pipe(through2.obj(function(node, encoding, callback) {
+    })).pipe(saxStream).pipe(through2.obj(function(node, encoding, callback) {
+      let x = "";
       switch (node.nodeType) {
         case import_SAXParser.ENodeTypes.opentag:
-          this.push(`<${node.data.name}${_.map(node.data.attributes, (v, k) => ` ${k}="${v}"`).join("")}${node.data.isSelfClosing ? "/" : ""}>`);
+          this.push(x = `<${node.data.name}${_.map(node.data.attributes, (v, k) => ` ${k}="${v}"`).join("")}${node.data.isSelfClosing ? "/" : ""}>`);
           break;
         case import_SAXParser.ENodeTypes.closetag:
-          this.push(`</${node.data}>`);
+          this.push(x = `</${node.data}>`);
           break;
         case import_SAXParser.ENodeTypes.text:
-          this.push(node.data);
+          this.push(x = node.data);
           break;
         case import_SAXParser.ENodeTypes.cdata:
-          this.push(`<![CDATA[${node.data}]]>`);
+          this.push(x = `<![CDATA[${node.data}]]>`);
           break;
       }
+      intermediateXml += x;
       callback();
     })).pipe(through2(function(chunk, encoding, callback) {
-      if (stopped) {
-        callback();
-        return;
-      }
+      outputXml += chunk;
       c2.total += chunk.length;
-      if (c2.total > maxSize) {
-        stopped = true;
-        stopAndCheck();
-      } else {
-        this.push(chunk);
-      }
+      this.push(chunk);
       callback();
-    })).pipe(devnull);
+    })).on("finish", () => {
+      fs.writeFileSync("inputXml.xml", inputXml, "utf8");
+      fs.writeFileSync("intermediateXml.xml", intermediateXml, "utf8");
+      fs.writeFileSync("outputXml.xml", outputXml, "utf8");
+      check2();
+    }).pipe(devnull);
   });
 }
 __name(check, "check");

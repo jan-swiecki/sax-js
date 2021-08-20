@@ -132,10 +132,6 @@ function randomXmlStream(options) {
     let h = highwaterMark;
     let buffer = "";
     for (const chunk of randomXml()) {
-      if (stop) {
-        buffer = "";
-        break;
-      }
       buffer += chunk;
       if (buffer.length > highwaterMark) {
         yield buffer;
@@ -145,7 +141,7 @@ function randomXmlStream(options) {
     }
     yield buffer;
   }());
-  ret.stop = () => {
+  ret.finish = () => {
     stop = true;
   };
   return ret;
@@ -159,7 +155,7 @@ function randomXmlStream(options) {
     const d = depthRes.value;
     let maxChildren = depth === 0 ? 1 : ceil(d.maxChildren * random());
     if (maxChildren >= 1) {
-      while (maxChildren--) {
+      while (maxChildren-- && !stop) {
         const tag = randomString(10, alphabetic, garbageProbability);
         yield* openTag(tag, d, indent, format);
         yield* randomXml(depth + 1);

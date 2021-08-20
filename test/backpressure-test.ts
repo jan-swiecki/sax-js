@@ -48,6 +48,7 @@ function check(N: number, maxSize: number, highWaterMark: number) {
     saxStream.emitAllNodeTypes()
   
     let inputXml = ''
+    let intermediateXml = ''
     let outputXml = ''
     let size = 0
   
@@ -81,18 +82,18 @@ function check(N: number, maxSize: number, highWaterMark: number) {
     })
 
   
-    const stopAndCheck = () => {
+    const check = () => {
       console.log('stop and check')
-      infiniteXml.stop()
-
+      // infiniteXml.stop()
+      // infiniteXml.unpipe()
       // infiniteXml.unpipe()
       // infiniteXml.destroy()
       // speedMeter.stop()
-    
+
       const t1 = c1.total
       const t2 = c2.total
       const diffPercent = Math.abs(t2-t1)/t2
-      tap.ok(diffPercent < 0.05, `diffPercent < 0.05, t1=${t1} t2=${t2} diffPercent=${diffPercent.toFixed(3)}, N=${N}, xml stream size=${formatBytes(maxSize)}`)
+      tap.ok(diffPercent < 0.05, `diffPercent < 0.05, t1=${t1} t2=${t2} diffPercent=${diffPercent.toFixed(3)}, N=${N}, xml stream size=${formatBytes(maxSize)}, highWaterMark=${formatBytes(highWaterMark)}`)
       resolve()
     }
   
@@ -100,64 +101,45 @@ function check(N: number, maxSize: number, highWaterMark: number) {
   
     infiniteXml
       .pipe(through2(function(chunk, encoding, callback) {
-        // console.log('c1 chunk', chunk.length)
-        if(stopped) {
-          callback()
-          return
-        }
-  
-        // process.stdout.write('.')
-        // c1.tick(chunk.length)
+        inputXml += chunk
 
-        if(c1.total > maxSize) {
-          // process.exit()
+        if(c1.total > maxSize && !stopped) {
           stopped = true
-          stopAndCheck()
-        } else {
-          c1.total += chunk.length
-          this.push(chunk)
+          infiniteXml.finish()
         }
-        // callback()
-        // process.nextTick(() => callback())
+
+        c1.total += chunk.length
+        this.push(chunk)
         callback()
       }))
       .pipe(saxStream)
-      .on('error', err => {
-        // ignore, because we cut input stream in half so saxStream will break
-      })
+      // .on('error', err => {
+      //   throw err
+      //   // ignore, because we cut input stream in half so saxStream will break
+      // })
       .pipe(through2.obj(function(node: SAXDataEvent, encoding, callback) {
+        let x = '';
         switch(node.nodeType) {
-          case ENodeTypes.opentag:      this.push(`<${node.data.name}${_.map(node.data.attributes, (v, k) => ` ${k}="${v}"`).join('')}${node.data.isSelfClosing ? '/' : ''}>`); break;
-          case ENodeTypes.closetag:     this.push(`</${node.data}>`); break;
-          case ENodeTypes.text:         this.push(node.data); break
-          case ENodeTypes.cdata:        this.push(`<![CDATA[${node.data}]]>`); break
+          case ENodeTypes.opentag:      this.push(x = `<${node.data.name}${_.map(node.data.attributes, (v, k) => ` ${k}="${v}"`).join('')}${node.data.isSelfClosing ? '/' : ''}>`); break;
+          case ENodeTypes.closetag:     this.push(x = `</${node.data}>`); break;
+          case ENodeTypes.text:         this.push(x = node.data); break
+          case ENodeTypes.cdata:        this.push(x = `<![CDATA[${node.data}]]>`); break
         }
+        intermediateXml += x
         callback()
       }))
       .pipe(through2(function(chunk, encoding, callback) {
-        // process.stdout.write(',')
-        // if(c1.total > maxSize) {
-        //   process.exit()
-        // }
-        
-        // console.log('c2 chunk', chunk.length)
-        if(stopped) {
-          callback()
-          return
-        }
-  
-        // c2.tick(chunk.length)
+        outputXml += chunk
         c2.total += chunk.length
-  
-        if(c2.total > maxSize) {
-          // process.exit()
-          stopped = true
-          stopAndCheck()
-        } else {
-          this.push(chunk)
-        }
+        this.push(chunk)
         callback()
       }))
+      .on('finish', () => {
+        fs.writeFileSync('inputXml.xml', inputXml, 'utf8')
+        fs.writeFileSync('intermediateXml.xml', intermediateXml, 'utf8')
+        fs.writeFileSync('outputXml.xml', outputXml, 'utf8')
+        check()
+      })
       .pipe(devnull);
   })
 }

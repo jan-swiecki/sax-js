@@ -17,21 +17,25 @@ var __toModule = (module2) => {
   return __reExport(__markAsModule(__defProp(module2 != null ? __create(__getProtoOf(module2)) : {}, "default", module2 && module2.__esModule && "default" in module2 ? { get: () => module2.default, enumerable: true } : { value: module2, enumerable: true })), module2);
 };
 var import_randomXmlStream = __toModule(require("./randomXmlStream"));
-(0, import_randomXmlStream.randomXmlStream)({
+const randomXml = (0, import_randomXmlStream.randomXmlStream)({
   depthGenerator: function(n) {
     const x = n + 1;
-    const y = x === 1 ? 1 : 3 - Math.log(x);
+    const y = x;
     if (y < 1) {
       return;
     }
     return {
-      maxAttributes: y,
-      maxAttributeKeySize: 10 * y,
-      maxAttributeValueSize: 20 * y,
-      maxTextSize: 50 * y,
+      maxAttributes: 1,
+      maxAttributeKeySize: 1,
+      maxAttributeValueSize: 1,
+      maxTextSize: 1,
       maxCDataSize: 0,
-      maxChildren: y
+      maxChildren: Infinity
     };
   },
   format: true
-}).pipe(process.stdout);
+});
+randomXml.pipe(process.stdout);
+setTimeout(() => {
+  randomXml.finish();
+}, 10);
