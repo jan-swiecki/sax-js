@@ -11,7 +11,10 @@ esbuild="esbuild \
   --outdir=dist"
 
 if [ "$1" == "--for-testing" ]; then
-  $esbuild --format=cjs --outdir=dist lib/*.ts test/*
+  $esbuild --format=cjs --outdir=dist \
+    lib/*.ts \
+    test/*.{js,ts} \
+    test/stream-tests/*.ts
 else
   $esbuild --format=cjs --bundle lib/sax.ts
   # cp package.json dist

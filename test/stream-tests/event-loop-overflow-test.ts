@@ -6,12 +6,12 @@ import tap = require('tap');
 import through2 = require('through2');
 
 
-import { getSpeedMeter } from '../lib/speed';
-import { bytesEmojiFormatter, formatBytes } from '../lib/SpeedFormatters';
+import { getSpeedMeter } from '../../lib/speed';
+import { bytesEmojiFormatter, formatBytes } from '../../lib/SpeedFormatters';
 import { Transform, TransformCallback, Writable } from 'stream';
-import { Depth, randomXmlStream } from '../lib/randomXmlStream';
-import { SAXDataEvent, SAXStream } from '../lib/SAXStream';
-import { ENodeTypes } from '../lib/SAXParser';
+import { Depth, randomXmlStream } from '../../lib/randomXmlStream';
+import { SAXDataEvent, SAXStream } from '../../lib/SAXStream';
+import { ENodeTypes } from '../../lib/SAXParser';
 
 const one_kb = 1024;
 const one_mb = 1024*1024;

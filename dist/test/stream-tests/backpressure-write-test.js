@@ -17,10 +17,10 @@ var __reExport = (target, module2, desc) => {
 var __toModule = (module2) => {
   return __reExport(__markAsModule(__defProp(module2 != null ? __create(__getProtoOf(module2)) : {}, "default", module2 && module2.__esModule && "default" in module2 ? { get: () => module2.default, enumerable: true } : { value: module2, enumerable: true })), module2);
 };
-var import_SpeedFormatters = __toModule(require("../lib/SpeedFormatters"));
-var import_randomXmlStream = __toModule(require("../lib/randomXmlStream"));
-var import_SAXStream = __toModule(require("../lib/SAXStream"));
-var import_SAXParser = __toModule(require("../lib/SAXParser"));
+var import_SpeedFormatters = __toModule(require("../../lib/SpeedFormatters"));
+var import_randomXmlStream = __toModule(require("../../lib/randomXmlStream"));
+var import_SAXStream = __toModule(require("../../lib/SAXStream"));
+var import_SAXParser = __toModule(require("../../lib/SAXParser"));
 var import_stream = __toModule(require("stream"));
 const fs = require("fs");
 const _ = require("lodash");

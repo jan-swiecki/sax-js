@@ -6,11 +6,11 @@ import tap = require('tap');
 import through2 = require('through2');
 
 
-import { formatBytes } from '../lib/SpeedFormatters';
-import { Depth, randomXmlStream } from '../lib/randomXmlStream';
-import { SAXDataEvent, SAXStream } from '../lib/SAXStream';
-import { ENodeTypes } from '../lib/SAXParser';
-import xmlBeautifier from '../lib/xml-beautifier';
+import { formatBytes } from '../../lib/SpeedFormatters';
+import { Depth, randomXmlStream } from '../../lib/randomXmlStream';
+import { SAXDataEvent, SAXStream } from '../../lib/SAXStream';
+import { ENodeTypes } from '../../lib/SAXParser';
+import xmlBeautifier from '../../lib/xml-beautifier';
 import { Transform } from 'stream';
 
 
@@ -86,8 +86,7 @@ function check(N: number, maxSize: number, highWaterMark: number, trailingRandom
         }
       },
       trailingEndLine: false,
-      highWatermark: highWaterMark,
-      slow: true
+      highWatermark: highWaterMark
     })
 
   

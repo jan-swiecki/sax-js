@@ -1,9 +1,9 @@
 import through2 = require('through2')
 import tap = require('tap')
 
-import { Depth, randomXmlStream } from '../lib/randomXmlStream';
-import { SAXDataEvent, SAXStream } from '../lib/SAXStream';
-import { ENodeTypes } from '../lib/SAXParser';
+import { Depth, randomXmlStream } from '../../lib/randomXmlStream';
+import { SAXDataEvent, SAXStream } from '../../lib/SAXStream';
+import { ENodeTypes } from '../../lib/SAXParser';
 import _ = require('lodash');
 
 

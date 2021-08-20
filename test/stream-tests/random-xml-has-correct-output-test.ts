@@ -3,10 +3,10 @@ import tap = require('tap')
 import through2 = require('through2')
 
 
-import { Depth, randomXmlStream } from '../lib/randomXmlStream';
-import { ENodeTypes } from '../lib/SAXParser';
-import { SAXDataEvent, SAXStream } from '../lib/SAXStream';
-import xmlBeautifier from '../lib/xml-beautifier';
+import { Depth, randomXmlStream } from '../../lib/randomXmlStream';
+import { ENodeTypes } from '../../lib/SAXParser';
+import { SAXDataEvent, SAXStream } from '../../lib/SAXStream';
+import xmlBeautifier from '../../lib/xml-beautifier';
 
 
 tap.plan(9*2)

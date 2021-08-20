@@ -1,6 +1,6 @@
 import { PassThrough, Writable } from "stream"
 import tap = require("tap")
-import { SAXDataEvent, SAXStream } from "../lib/SAXStream"
+import { SAXDataEvent, SAXStream } from "../../lib/SAXStream"
 
 
 let saxStream = new SAXStream()

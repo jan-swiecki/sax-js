@@ -5,8 +5,8 @@ import tap = require('tap');
 import through2 = require('through2');
 
 
-import { getSpeedMeter } from '../lib/speed';
-import { bytesEmojiFormatter } from '../lib/SpeedFormatters';
+import { getSpeedMeter } from '../../lib/speed';
+import { bytesEmojiFormatter } from '../../lib/SpeedFormatters';
 import { Transform, TransformCallback } from 'stream';
 
 
