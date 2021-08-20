@@ -1,10 +1,17 @@
+import fs = require('fs');
+import through2 = require('through2');
+
+
 import _ = require("lodash");
 import { nowTime } from "./nanoTime";
 import { getSpeedCounter } from "./speed";
 import { SpeedCounter } from "./SpeedCounter";
 import { SpeedFormatter, plainFormatter } from './SpeedFormatters';
+import { Readable, Stream } from 'stream';
+
 
 let stream = process.stderr;
+
 
 export class SpeedMeter {
   private counters: SpeedCounter[] = []
@@ -12,7 +19,8 @@ export class SpeedMeter {
   private printThreshold = 10000000n;
   private lastTime = nowTime()
 
-  private interval: NodeJS.Timer
+  // private interval: NodeJS.Timer
+  private interval: Readable
 
   addCounter(counterName: string, formatter?: SpeedFormatter): SpeedCounter {
     const counter = getSpeedCounter(counterName)
@@ -22,15 +30,28 @@ export class SpeedMeter {
   }
 
   start(): SpeedMeter {
-    this.interval = setInterval(() => {
-      this.print()
-    }, 50)
+    const self = this;
+    this.print()
+    this.interval = fs.createReadStream('/dev/zero')
+
+    this.interval.pipe(through2(async function(chunk, encoding, callback) {
+        // process.nextTick(() => {
+          self.print()
+          this.push(chunk)
+          callback()
+        // })
+      }))
+      .pipe(fs.createWriteStream('/dev/null'))
+    // this.interval = setInterval(() => {
+    //   this.print()
+    // }, 50)
     return this
   }
 
   stop(): SpeedMeter {
     if(! _.isUndefined(this.interval)) {
-      clearInterval(this.interval)
+      // clearInterval(this.interval)
+      this.interval.destroy()
       stream.write('\n')
     }
     return this

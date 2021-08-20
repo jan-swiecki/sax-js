@@ -45,7 +45,9 @@ export type Depth = {
 type Options = {
   depthGenerator: (n: number) => Depth,
   trailingEndLine?: boolean,
-  garbageProbability?: number
+  format?: boolean,
+  garbageProbability?: number,
+  highWatermark?: number
 }
 
 
@@ -63,7 +65,7 @@ function gen(f: (n: number) => Depth) {
 }
 
 
-function * openTag(t: string, d: Depth = null, indent = ''): IterableIterator<string> {
+function * openTag(t: string, d: Depth = null, indent = '', format: boolean = true): IterableIterator<string> {
   yield `${indent}<${t}`;
 
   let a: IteratorResult<string, string>
@@ -84,26 +86,39 @@ function * openTag(t: string, d: Depth = null, indent = ''): IterableIterator<st
     // yield `${key}="${value}"`
   }
 
-  yield '>\n'
+  yield '>'
+
+  if(format) {
+    yield '\n'
+  }
 
   const text = randomString(ceil(d.maxTextSize*random()))
-  for(let x = 0; x < text.length; x += 120) {
-    yield `${indent}  ${text.substring(x, x+120)}\n`;
+
+  if(format) {
+    for(let x = 0; x < text.length; x += 120) {
+      yield `${indent}  ${text.substring(x, x+120)}\n`;
+    }
+  } else {
+    yield text
   }
 
   const cdata = randomString(ceil(d.maxCDataSize*random()))
-  if(cdata.length > 0) {
-    yield `${indent}  <![CDATA[`
-    for(let x = 0; x < cdata.length; x += 120) {
-      if(x > 0) {
-        yield `${indent}  `
+  if(format) {
+    if(cdata.length > 0) {
+      yield `${indent}  <![CDATA[`
+      for(let x = 0; x < cdata.length; x += 120) {
+        if(x > 0) {
+          yield `${indent}  `
+        }
+        yield `${cdata.substring(x, x+120)}`;
+        if(x+120 < cdata.length) {
+          yield '\n'
+        }
       }
-      yield `${cdata.substring(x, x+120)}`;
-      if(x+120 < cdata.length) {
-        yield '\n'
-      }
+      yield `]]>\n`
     }
-    yield `]]>\n`
+  } else {
+    yield `<![CDATA[${cdata}]]>`
   }
 }
 
@@ -128,23 +143,62 @@ function * randomAttributesString(maxAttributes, maxAttributeKeySize, maxAttribu
 }
 
 
-export function randomXmlStream(options: Options): Readable {
+export function randomXmlStream(options: Options): Readable & {stop: () => {}} {
   const depthGenerator = gen(options.depthGenerator)
   const depthResults: IteratorResult<Depth>[] = []
 
   const trailingEndLine = _.isUndefined(options.trailingEndLine) ? true : options.trailingEndLine
   const garbageProbability = _.isUndefined(options.garbageProbability) ? 0 : options.garbageProbability
+  const format = _.isUndefined(options.format) ? true : options.format
 
 
-  return Readable.from(function *() {
+  const highwaterMark = options.highWatermark || 16*1024;
+  
+  let stop = false
+
+  // @ts-ignore
+  const ret = Readable.from(async function *() {
+    // yield * randomXml()
+    let h = highwaterMark
+    let buffer = ''
+
     for(const chunk of randomXml()) {
-      yield chunk
+      if(stop) {
+        buffer = ''
+        // yield null
+        break;
+      }
+      buffer += chunk
+      if(buffer.length > highwaterMark) {
+        yield buffer
+        buffer = ''
+
+        // pause here so we dont overflow node event loop
+        await new Promise(r => setImmediate(r))
+      }
     }
-  }())
+    yield buffer
+    // for(const chunk of randomXml()) {
+    //   buffer += chunk
+    //   if(buffer.length > highwaterMark) {
+    //     yield buffer
+    //     buffer = ''
+    //   }
+    // }
+    // yield buffer
+  }());
+
+  // @ts-ignore
+  ret.stop = () => {
+    stop = true;
+  };
+
+  // @ts-ignore
+  return ret;
 
 
   function * randomXml(depth = 0): IterableIterator<string> {
-    const indent        = '  '.repeat(depth)
+    const indent        = format ? '  '.repeat(depth) : ''
     const depthRes      = depthResults[depth] || depthGenerator.next()
     depthResults[depth] = depthRes
     
@@ -160,11 +214,11 @@ export function randomXmlStream(options: Options): Readable {
     if(maxChildren >= 1) {
       while(maxChildren--) {
         const tag = randomString(10, alphabetic, garbageProbability)
-        yield * openTag(tag, d, indent)
+        yield * openTag(tag, d, indent, format)
         yield * randomXml(depth+1)
         yield indent
         yield * closeTag(tag)
-        if(trailingEndLine) {
+        if(trailingEndLine && format) {
           yield '\n'
         }
       }

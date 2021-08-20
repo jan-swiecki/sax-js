@@ -8,6 +8,7 @@ var __export = (target, all) => {
 };
 __export(exports, {
   bytesEmojiFormatter: () => bytesEmojiFormatter,
+  formatBytes: () => formatBytes,
   plainFormatter: () => plainFormatter
 });
 function plainFormatter(bps, total) {
@@ -17,6 +18,31 @@ function plainFormatter(bps, total) {
   };
 }
 __name(plainFormatter, "plainFormatter");
+function formatBytes(bytes) {
+  let f;
+  let unit;
+  if (bytes < 10) {
+    f = 0;
+    unit = "b";
+  } else if (bytes < 1024) {
+    f = 0;
+    unit = "b";
+  } else if (bytes < 1024 ** 2) {
+    f = 1;
+    unit = "kb";
+  } else if (bytes < 1024 ** 3) {
+    f = 2;
+    unit = "mb";
+  } else if (bytes < 1024 ** 4) {
+    f = 3;
+    unit = "gb";
+  } else {
+    f = 5;
+    unit = "gb";
+  }
+  return (bytes / 1024 ** f).toFixed(2) + unit;
+}
+__name(formatBytes, "formatBytes");
 function bytesEmojiFormatter(bps, total) {
   let speed_f;
   let speed_unit;
@@ -79,5 +105,6 @@ __name(bytesEmojiFormatter, "bytesEmojiFormatter");
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   bytesEmojiFormatter,
+  formatBytes,
   plainFormatter
 });

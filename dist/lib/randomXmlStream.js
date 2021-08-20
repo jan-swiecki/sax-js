@@ -60,7 +60,7 @@ function gen(f) {
   }, "g"))();
 }
 __name(gen, "gen");
-function* openTag(t, d = null, indent = "") {
+function* openTag(t, d = null, indent = "", format = true) {
   yield `${indent}<${t}`;
   let a;
   let attrs = randomAttributesString(d.maxAttributes || 0, d.maxAttributeKeySize || 0, d.maxAttributeValueSize || 0);
@@ -71,26 +71,37 @@ function* openTag(t, d = null, indent = "") {
     yield " ";
     yield a.value;
   }
-  yield ">\n";
+  yield ">";
+  if (format) {
+    yield "\n";
+  }
   const text = randomString(ceil(d.maxTextSize * random()));
-  for (let x = 0; x < text.length; x += 120) {
-    yield `${indent}  ${text.substring(x, x + 120)}
+  if (format) {
+    for (let x = 0; x < text.length; x += 120) {
+      yield `${indent}  ${text.substring(x, x + 120)}
 `;
+    }
+  } else {
+    yield text;
   }
   const cdata = randomString(ceil(d.maxCDataSize * random()));
-  if (cdata.length > 0) {
-    yield `${indent}  <![CDATA[`;
-    for (let x = 0; x < cdata.length; x += 120) {
-      if (x > 0) {
-        yield `${indent}  `;
+  if (format) {
+    if (cdata.length > 0) {
+      yield `${indent}  <![CDATA[`;
+      for (let x = 0; x < cdata.length; x += 120) {
+        if (x > 0) {
+          yield `${indent}  `;
+        }
+        yield `${cdata.substring(x, x + 120)}`;
+        if (x + 120 < cdata.length) {
+          yield "\n";
+        }
       }
-      yield `${cdata.substring(x, x + 120)}`;
-      if (x + 120 < cdata.length) {
-        yield "\n";
-      }
-    }
-    yield `]]>
+      yield `]]>
 `;
+    }
+  } else {
+    yield `<![CDATA[${cdata}]]>`;
   }
 }
 __name(openTag, "openTag");
@@ -114,13 +125,32 @@ function randomXmlStream(options) {
   const depthResults = [];
   const trailingEndLine = _.isUndefined(options.trailingEndLine) ? true : options.trailingEndLine;
   const garbageProbability = _.isUndefined(options.garbageProbability) ? 0 : options.garbageProbability;
-  return import_stream.Readable.from(function* () {
+  const format = _.isUndefined(options.format) ? true : options.format;
+  const highwaterMark = options.highWatermark || 16 * 1024;
+  let stop = false;
+  const ret = import_stream.Readable.from(async function* () {
+    let h = highwaterMark;
+    let buffer = "";
     for (const chunk of randomXml()) {
-      yield chunk;
+      if (stop) {
+        buffer = "";
+        break;
+      }
+      buffer += chunk;
+      if (buffer.length > highwaterMark) {
+        yield buffer;
+        buffer = "";
+        await new Promise((r) => setImmediate(r));
+      }
     }
+    yield buffer;
   }());
+  ret.stop = () => {
+    stop = true;
+  };
+  return ret;
   function* randomXml(depth = 0) {
-    const indent = "  ".repeat(depth);
+    const indent = format ? "  ".repeat(depth) : "";
     const depthRes = depthResults[depth] || depthGenerator.next();
     depthResults[depth] = depthRes;
     if (depthRes.done) {
@@ -131,11 +161,11 @@ function randomXmlStream(options) {
     if (maxChildren >= 1) {
       while (maxChildren--) {
         const tag = randomString(10, alphabetic, garbageProbability);
-        yield* openTag(tag, d, indent);
+        yield* openTag(tag, d, indent, format);
         yield* randomXml(depth + 1);
         yield indent;
         yield* closeTag(tag);
-        if (trailingEndLine) {
+        if (trailingEndLine && format) {
           yield "\n";
         }
       }

@@ -9,6 +9,32 @@ export function plainFormatter(bps: number, total: number) {
 }
 
 
+export function formatBytes(bytes: number) {
+  let f
+  let unit
+  if(bytes < 10) {
+    f = 0;
+    unit = 'b';
+  } else if(bytes < 1024) {
+    f = 0;
+    unit = 'b';
+  } else if(bytes < 1024**2) {
+    f = 1;
+    unit = 'kb';
+  } else if(bytes < 1024**3) {
+    f = 2;
+    unit = 'mb';
+  } else if(bytes < 1024**4) {
+    f = 3;
+    unit = 'gb';
+  } else {
+    f = 5;
+    unit = 'gb';
+  }
+  return ((bytes/(1024**f)).toFixed(2) + unit)
+}
+
+
 export function bytesEmojiFormatter(bps: number, total: number) {
   let speed_f: number
   let speed_unit: string

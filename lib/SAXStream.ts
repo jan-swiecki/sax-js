@@ -111,7 +111,9 @@ export class SAXStream extends Transform {
       //   throw new Error(`Error: unsupported partial chunks of unicode strings, string decoder 'end' method returned non-zero length string from internal buffer: ${end}`)
       // }
     }
+    // console.log('write to parser', chunk.length)
     this._parser.write(chunk.toString())
+    // console.log('write to parser -- done, callback', chunk.length)
     callback();
   }
 

@@ -9,10 +9,13 @@ import { SAXDataEvent, SAXStream } from '../lib/SAXStream';
 import xmlBeautifier from '../lib/xml-beautifier';
 
 
-tap.plan(6*2)
+tap.plan(9*2)
 check(3)
 check(3)
 check(3)
+check(3, false)
+check(3, false)
+check(3, false)
 check(4)
 check(4)
 check(4)
@@ -21,7 +24,7 @@ check(4)
 // check(4.2)
 
 
-function check(N: number) {
+function check(N: number, format: boolean = true) {
   const saxStream = new SAXStream(true)
   saxStream.emitAllNodeTypes()
 
@@ -47,7 +50,8 @@ function check(N: number) {
         maxChildren: y
       }
     },
-    trailingEndLine: false
+    trailingEndLine: false,
+    format: format
   })
     .pipe(through2(function(chunk, encoding, callback) {
       size += chunk.length

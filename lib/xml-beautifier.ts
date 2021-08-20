@@ -26,12 +26,14 @@
 
 import _ = require('lodash')
 
+
 const splitOnTags = str => str.split(/(<\/?[^>]+>)/g).filter(line => line.trim() !== '');
 const isTag = str => /<[^>!]+>/.test(str);
 const isXMLDeclaration = str => /<\?[^?>]+\?>/.test(str);
 const isClosingTag = str => /<\/+[^>]+>/.test(str);
 const isSelfClosingTag = str => /<[^>]+\/>/.test(str);
 const isOpeningTag = str => isTag(str) && !isClosingTag(str) && !isSelfClosingTag(str) && !isXMLDeclaration(str);
+
 
 export default (xml: string, spaces: number = 2) => {
   let depth = 0;

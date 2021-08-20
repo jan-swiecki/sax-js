@@ -28,6 +28,8 @@ __export(exports, {
 var import_nanoTime = __toModule(require("./nanoTime"));
 var import_speed = __toModule(require("./speed"));
 var import_SpeedFormatters = __toModule(require("./SpeedFormatters"));
+const fs = require("fs");
+const through2 = require("through2");
 const _ = require("lodash");
 let stream = process.stderr;
 class SpeedMeter {
@@ -44,14 +46,19 @@ class SpeedMeter {
     return counter;
   }
   start() {
-    this.interval = setInterval(() => {
-      this.print();
-    }, 50);
+    const self = this;
+    this.print();
+    this.interval = fs.createReadStream("/dev/zero");
+    this.interval.pipe(through2(async function(chunk, encoding, callback) {
+      self.print();
+      this.push(chunk);
+      callback();
+    })).pipe(fs.createWriteStream("/dev/null"));
     return this;
   }
   stop() {
     if (!_.isUndefined(this.interval)) {
-      clearInterval(this.interval);
+      this.interval.destroy();
       stream.write("\n");
     }
     return this;
