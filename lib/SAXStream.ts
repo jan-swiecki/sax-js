@@ -123,10 +123,14 @@ export class SAXStream extends Transform {
     // console.log(`x -- ${chunk.length}`)
     // console.log(`sax stream --`.padStart(15), chunk.length)
     this._parser.write(chunk.toString())
-    for(const event of this._parser.saxDataEvents) {
-      this.push(event)
+    if(this._parser.error) {
+      callback(this._parser.error)
+    } else {
+      for(const event of this._parser.saxDataEvents) {
+        this.push(event)
+      }
+      callback();
     }
-    callback();
   }
 
   _flush(callback) {
