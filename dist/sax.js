@@ -5930,6 +5930,7 @@ var require_lodash = __commonJS({
 // lib/sax.ts
 __export(exports, {
   ENTITIES: () => ENTITIES,
+  ENodeTypes: () => ENodeTypes,
   EventTypes: () => EventTypes,
   SAXParser: () => SAXParser,
   SAXStream: () => SAXStream,
@@ -7312,10 +7313,11 @@ var SAXStream = class extends import_stream2.Transform {
 __name(SAXStream, "SAXStream");
 
 // lib/sax.ts
-var sax_default = { SAXParser, SAXStream, EventTypes, ENTITIES };
+var sax_default = { SAXParser, SAXStream, EventTypes, ENTITIES, ENodeTypes };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   ENTITIES,
+  ENodeTypes,
   EventTypes,
   SAXParser,
   SAXStream
