@@ -81,8 +81,7 @@ export declare class SAXStream extends Transform {
     emitNodeTypes(...nodeTypes: NodeType[]): void;
     emitAllNodeTypes(): void;
     private alsoEmit;
-    _destroy(err: any, callback: any): void;
-    _write(chunk: any, encoding: any, callback: any): void;
+    _transform(chunk: any, encoding: any, callback: any): void;
     _flush(callback: any): void;
     private __push;
 }

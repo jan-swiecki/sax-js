@@ -7281,11 +7281,7 @@ var SAXStream = class extends import_stream2.Transform {
     this.emit(event.nodeType, event.data);
     return event;
   }
-  _destroy(err, callback) {
-    this.buffer = [];
-    callback(err);
-  }
-  _write(chunk, encoding, callback) {
+  _transform(chunk, encoding, callback) {
     if (Buffer.isBuffer(chunk)) {
       chunk = this._decoder.write(chunk);
     }

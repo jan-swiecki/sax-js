@@ -4,7 +4,25 @@ import tap = require('tap')
 
 import { Depth, randomXmlStream } from '../../lib/randomXmlStream';
 import { SAXStream } from '../../lib/SAXStream';
-import { Transform } from 'stream';
+import { Transform, Writable } from 'stream';
+
+
+const debug = (name, stream) => {
+  // stream.on('close', () => console.log(`${name} close`))
+  // // stream.on('data', () => console.log(`${name} data`))
+  // stream.on('end', () => console.log(`${name} end`))
+  // stream.on('error', (err) => console.log(`${name} error:`, err))
+  // stream.on('open', () => console.log(`${name} open`))
+  // stream.on('pause', () => console.log(`${name} pause`))
+  // // stream.on('readable', () => console.log(`${name} readable`))
+  // stream.on('ready', () => console.log(`${name} ready`))
+  // stream.on('resume', () => console.log(`${name} resume`))
+  // stream.on('drain', () => console.log(`${name} drain`))
+  // stream.on('finish', () => console.log(`${name} finish`))
+  // stream.on('pipe', () => console.log(`${name} pipe`))
+  // stream.on('unpipe', () => console.log(`${name} unpipe`))
+  return stream
+}
 
 
 tap.resolves(check(0), 'resolves 1')
@@ -26,7 +44,14 @@ function check(garbageProbability: number): Promise<void> {
     const saxStream = new SAXStream(true)
     saxStream.emitAllNodeTypes()
     
-    return randomXmlStream({
+    const devnull = new Writable({
+      objectMode: true,
+      write(chunk, encoding, callback) {
+        callback()
+      }
+    })
+
+    return debug('randomXmlStream', randomXmlStream({
       depthGenerator: function(n: number): Depth {
         const x = n+1
         const y = n === 1 ? 1 : 3-Math.log(x)
@@ -46,7 +71,7 @@ function check(garbageProbability: number): Promise<void> {
       },
       trailingEndLine: false,
       garbageProbability: garbageProbability
-    })
+    }))
       // .pipe(new Transform({
       //   transform(chunk, encoding, callback) {
       //     // process.stdout.write(`'''${chunk}''' `);
@@ -54,12 +79,13 @@ function check(garbageProbability: number): Promise<void> {
       //     callback()
       //   }
       // }))
-      .pipe(saxStream)
+      .pipe(debug('saxStream', saxStream))
       .on('error', err => {
         reject(err)
       })
       .on('finish', () => {
         resolve()
       })
+      .pipe(devnull)
   })
 }

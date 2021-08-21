@@ -110,13 +110,13 @@ export class SAXStream extends Transform {
     return event;
   }
 
-  _destroy(err, callback) {
-    this.buffer = []
-    callback(err);
-  }
+  // _destroy(err, callback) {
+  //   this.buffer = []
+  //   callback(err);
+  // }
 
   // Writable methods
-  _write(chunk, encoding, callback) {
+  _transform(chunk, encoding, callback) {
     if (Buffer.isBuffer(chunk)) {
       chunk = this._decoder.write(chunk)
     }
